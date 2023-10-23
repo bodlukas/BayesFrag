@@ -343,7 +343,7 @@ class PointEstimates(object):
         self.params = xarray_params
         self._compute_etas()
         # + 1 to include damage state 0 (i.e., no damage)
-        self.n_ds = len(self.samples.ds.values) + 1
+        self.n_ds = len(self.params.ds.values) + 1
 
 
     @classmethod
@@ -476,4 +476,4 @@ class PointEstimates(object):
 
         '''  
         vars = ['beta', 'eta', 'deltas']
-        self.samples[vars].to_netcdf(filepath, **kwargs)
+        self.params[vars].to_netcdf(filepath, **kwargs)
