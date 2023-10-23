@@ -459,7 +459,7 @@ class PointEstimates(object):
         '''  
         kwargs['color'] = color
         betas = self.params.sel({'bc': bc}).beta.values
-        for i, ds in enumerate(self.args['list_ds'][1:]):
+        for i, ds in enumerate(self.params.ds.values):
             if i > 0: kwargs['label'] = None
             etas = self.params.sel({'bc': bc, 'ds': ds}).etas.values
             ax.plot(im, stats.norm.cdf(np.log(im)/betas - etas), 
