@@ -3,7 +3,7 @@ import pandas as pd
 import warnings
 
 from modules.utils import Sites
-# ['pga', 'T0_200', 'T0_300', 'T0_600']
+# ['PGA', 'SAT0_200', 'SAT0_300', 'SAT0_600']
 
 EARTHRADIUS = 6371.0 # Radius of earth in km.
 
@@ -17,10 +17,10 @@ class SpatialCorrelationModel(object):
             im_string (str): Indicate for which im to compute correlations.
         """        
         # self.im = imt.from_string(im_string)
-        if im_string == 'pga':
+        if im_string == 'PGA':
             self.T = 0.0
         else: 
-            self.T = float('.'.join( im_string[1:].split('_') ))
+            self.T = float('.'.join( im_string[3:].split('_') ))
         
         self._required = ['coor']
         self.name = 'none'

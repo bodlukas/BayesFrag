@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 
-# ['pga', 'T0_200', 'T0_300', 'T0_600']
-
 class Sites(object):
     """Wrapper for geographic sites at which to predict ground-motion amplitudes.
     """    
