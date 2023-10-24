@@ -97,12 +97,12 @@ class EspositoIervolino2012(SpatialCorrelationModel):
 
     '''
 
-    def __init__(self, im_string, dataset='esm'):
+    def __init__(self, im_string, dataset='it'):
         '''
         Args:
             dataset (str): Indicate which parameters to be used. 
-                'esm': Parameters estimated from European data set
                 'it': Parameters estimated from Italian data set
+                'esm': Parameters estimated from European data set
         '''
         super().__init__(im_string)
         self.corr_range = self._get_parameter_range(dataset)

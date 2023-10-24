@@ -42,7 +42,7 @@ class Posterior(object):
         Initialize object directly the numpyro mcmc object used for inference.
 
         Args:
-            numpyro_mcmc: The object 
+            numpyro_mcmc: The numpyro mcmc object used for inference.
 
             args (dict): Settings used for inference (-> see the example notebooks)
                 Minimally required attributes consist of:
@@ -67,12 +67,18 @@ class Posterior(object):
         res_az.posterior.attrs['SCM'] = args['SCM']
         return cls(xarray_samples = az.extract(res_az.posterior))    
 
-    def get_diagnostics(self):
+    def get_diagnostics(self, verbosity: bool = True):
         '''
         Computes MCMC convergence diagnostic metrics: effective sample size and
         R-hat. See also Appendix C of the Manuscript for further information.
         '''
         dfdiagnostic = az.summary(self.samples.unstack(), kind='diagnostics')
+        if verbosity:
+            print('Total number of variables:', len(dfdiagnostic))
+            print('Variables where effective sample size is below 400:',
+                np.sum(dfdiagnostic.ess_bulk < 400))
+            print('Variables where rank-normalized r-hat is larger than 1.01:',
+                np.sum(dfdiagnostic.r_hat > 1.01))
         return dfdiagnostic[['ess_bulk', 'r_hat']]
 
     def get_mean_fragparams(self, dataframe: bool = True, option: str = 'thetas'):
@@ -142,22 +148,6 @@ class Posterior(object):
         if 'z' not in self.samples:
             raise ValueError('Requires access to posterior samples of z')
         return mu_B_S[:, None] + (L_BB_S @ self.samples.z.values)
-
-    def get_mean_std_logIM(self, mu_B_S, L_BB_S):
-        '''
-        Computes the mean and standard deviation of the posterior logIM samples 
-        at the locations of the surveyed buildings.
-
-        Args:
-            mu_B_S (ArrayLike): Mean of logIM at the surveyed buildings conditional
-                on station data. Dimension: (n_sites,)
-
-            L_BB_S (ArrayLike): Lower Cholesky transform of covariance matrix of logIM 
-                at the surveyed buildings conditional on station data. 
-                Dimension: (n_sites x n_sites)       
-        '''
-        samples_logIM = self.get_logIM_samples(mu_B_S, L_BB_S)
-        return np.mean(samples_logIM, axis=1), np.std(samples_logIM, axis=1) 
   
     def plot_frag_funcs(self, ax, bc, im, color, ds_subset = None,
                         kwargsm=dict(), includeCI: bool=True, 
@@ -430,11 +420,10 @@ class PointEstimates(object):
                 etas = self.params.eta.values
                 coords = self.params['ds1'].values
         else: 
-            etas = np.log(self.params['thetas'].values) / self.params.beta.values[:,None]
+            etas = np.log(self.params.thetas.values) / self.params.beta.values[:,None]
             coords = self.params.ds.values
         self.params['etas'] = (['bc', 'ds'], etas)
-        self.params['etas'] = self.params['etas'].assign_coords(
-            {"ds": coords})
+        self.params['etas'] = self.params['etas'].assign_coords({"ds": coords})
   
     def plot_frag_funcs(self, ax, bc, im, color = None, kwargs=dict()):
         '''
