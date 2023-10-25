@@ -2,14 +2,18 @@
 
 This repository is currently under development. The links do not yet work.
 
+<!---
 [![DOI](https://zenodo.org/badge/542139247.svg)](https://zenodo.org/badge/latestdoi/542139247)
+-->
 
 This repository contains the code to perform Bayesian parameter estimation for empirical seismic fragility models. The methodology is presented in :
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
+<!---
 ![alt text](https://github.com/bodlukas/ground-motion-correlation-bayes/blob/main/data/corr_schema_dark.png#gh-dark-mode-only)
 ![alt text](https://github.com/bodlukas/ground-motion-correlation-bayes/blob/main/data/corr_schema_bright.png#gh-light-mode-only)
+-->
 
 ## Getting started
 
