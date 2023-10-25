@@ -33,8 +33,7 @@ class SpatialCorrelationModel(object):
                              'requires additional site attributes ' + 
                              ', '.join(np.array(self._required)[mask]))
 
-    def get_euclidean_distance_matrix(self, sites1: Sites, sites2=None, 
-                                      full_cov: bool=True):
+    def get_euclidean_distance_matrix(self, sites1: Sites, sites2=None):
         """Computes Euclidean distance matrix
 
         Computes the distance from each site in sites1 to every other site in 
@@ -48,37 +47,31 @@ class SpatialCorrelationModel(object):
             sites1 (Sites): Sites for which to compute distance matrix
             sites2 (Sites, optional): If not None distance matrix between
                 sites1 and sites2 is computed. Defaults to None.
-            full_cov (bool, optional): Flag whether to compute the full 
-                distance matrix or only the diagonal (zeros). Defaults to True.
-
         Returns:
             distances (np.array): Distance matrix in km
         """
         X1 = sites1.coor
-        if full_cov:
-            if sites2 is None: X2 = X1
-            else: X2 = sites2.coor
-            if sites1.coorunits == 'decdeg':
-                lons1 = np.radians(np.reshape(X1[:, 0], [-1, 1])) 
-                lats1 = np.radians(np.reshape(X1[:, 1], [-1, 1]))
-                lons2 = np.radians(np.reshape(X2[:, 0], [1, -1])) 
-                lats2 = np.radians(np.reshape(X2[:, 1], [1, -1]))
-                dist = np.arcsin( np.sqrt( np.sin((lats1 - lats2) / 2.0) ** 2.0
-                                                + np.cos(lats1) * np.cos(lats2)
-                                                * np.sin((lons1 - lons2) / 2.0) ** 2.0 )
-                                    )
-                dist = dist * (2*EARTHRADIUS)
-            else:
-                if sites1.coorunits == 'm': 
-                   X1 /= 1000 # from m to km
-                   X2 /= 1000 # from m to km
-                sq_dist = np.sum(np.stack([
-                    np.square(np.reshape(X1[:,i], [-1,1]) - np.reshape(X2[:,i], [1,-1]))
-                            for i in range(X1.shape[1])]), axis=0)
-                sq_dist = np.clip(sq_dist, 0, np.inf)
-                dist = np.sqrt(sq_dist)
+        if sites2 is None: X2 = X1
+        else: X2 = sites2.coor
+        if sites1.coorunits == 'decdeg':
+            lons1 = np.radians(np.reshape(X1[:, 0], [-1, 1])) 
+            lats1 = np.radians(np.reshape(X1[:, 1], [-1, 1]))
+            lons2 = np.radians(np.reshape(X2[:, 0], [1, -1])) 
+            lats2 = np.radians(np.reshape(X2[:, 1], [1, -1]))
+            dist = np.arcsin( np.sqrt( np.sin((lats1 - lats2) / 2.0) ** 2.0
+                                            + np.cos(lats1) * np.cos(lats2)
+                                            * np.sin((lons1 - lons2) / 2.0) ** 2.0 )
+                                )
+            dist = dist * (2*EARTHRADIUS)
         else:
-            dist = np.zeros(X1.shape[0])
+            if sites1.coorunits == 'm': 
+                X1 /= 1000 # from m to km
+                X2 /= 1000 # from m to km
+            sq_dist = np.sum(np.stack([
+                np.square(np.reshape(X1[:,i], [-1,1]) - np.reshape(X2[:,i], [1,-1]))
+                        for i in range(X1.shape[1])]), axis=0)
+            sq_dist = np.clip(sq_dist, 0, np.inf)
+            dist = np.sqrt(sq_dist)
         return dist
                 
 class EspositoIervolino2012(SpatialCorrelationModel):
@@ -108,10 +101,10 @@ class EspositoIervolino2012(SpatialCorrelationModel):
         self.corr_range = self._get_parameter_range(dataset)
         self.name = 'EspositoIervolino2012_' + dataset
 
-    def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None, full_cov: bool=True):
+    def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None):
         self.check_attributes(sites1)
         if sites2 is not None: self.check_attributes(sites2)
-        dist_mat = self.get_euclidean_distance_matrix(sites1, sites2, full_cov)
+        dist_mat = self.get_euclidean_distance_matrix(sites1, sites2)
         return np.exp(-3 * dist_mat / self.corr_range)
     
     def _get_parameter_range(self, dataset):
@@ -150,7 +143,7 @@ class BodenmannEtAl2023(SpatialCorrelationModel):
         self.name = 'BodenmannEtAl2023'
         self._required = ['coor', 'vs30', 'epiazi'] # Required site attributes
 
-    def get_angular_distance_matrix(self, sites1: Sites, sites2: Sites=None, full_cov: bool=True):
+    def get_angular_distance_matrix(self, sites1: Sites, sites2: Sites=None):
         '''
         Computes matrix with differences in epicentral azimuth values of sites.
         See also doc of get_euclidean_distance_matrix.
@@ -161,14 +154,11 @@ class BodenmannEtAl2023(SpatialCorrelationModel):
             azimuths2 = azimuths1.T
         else:
             azimuths2 = np.radians( sites2.epiazi ).reshape(1, -1)
-        if full_cov:
-            cos_angle = np.cos( np.abs(azimuths1 - azimuths2) )
-            distances =  np.arccos(np.clip(cos_angle, -1, 1))
-        else:
-            distances =  np.zeros_like(azimuths1)     
+        cos_angle = np.cos( np.abs(azimuths1 - azimuths2) )
+        distances =  np.arccos(np.clip(cos_angle, -1, 1))   
         return distances * 180/np.pi
     
-    def get_soil_dissimilarity_matrix(self, sites1: Sites, sites2: Sites=None, full_cov: bool=True):
+    def get_soil_dissimilarity_matrix(self, sites1: Sites, sites2: Sites=None):
         '''
         Computes the absolute difference in vs30 values between sites.
         See also doc of get_euclidean_distance_matrix.
@@ -178,19 +168,15 @@ class BodenmannEtAl2023(SpatialCorrelationModel):
             vs302 = vs301.T
         else:
             vs302 = sites2.vs30.reshape(1, -1)
-        if full_cov:
-            distances = np.abs(vs301 - vs302)
-        else:
-            distances =  np.zeros_like(vs301)      
+        distances = np.abs(vs301 - vs302) 
         return distances
 
-    def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None, full_cov: bool=True):
+    def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None):
         self.check_attributes(sites1)
         if sites2 is not None: self.check_attributes(sites2)
-
-        dist_mat_E = self.get_euclidean_distance_matrix(sites1, sites2, full_cov)
-        dist_mat_A = self.get_angular_distance_matrix(sites1, sites2, full_cov)
-        dist_mat_S = self.get_soil_dissimilarity_matrix(sites1, sites2, full_cov)
+        dist_mat_E = self.get_euclidean_distance_matrix(sites1, sites2)
+        dist_mat_A = self.get_angular_distance_matrix(sites1, sites2)
+        dist_mat_S = self.get_soil_dissimilarity_matrix(sites1, sites2)
         params = self._get_parameters()
         rho_E = np.exp( - np.power(dist_mat_E / params['LE'], params['gammaE']) )
         rho_A = (1 + dist_mat_A/params['LA']) * np.power(1 - dist_mat_A/180, 180/params['LA'])

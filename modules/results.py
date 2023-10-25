@@ -39,7 +39,7 @@ class Posterior(object):
     @classmethod
     def from_mcmc(cls, numpyro_mcmc, args):
         """
-        Initialize object directly the numpyro mcmc object used for inference.
+        Initialize object directly from the numpyro mcmc object used for inference.
 
         Args:
             numpyro_mcmc: The numpyro mcmc object used for inference.
@@ -72,7 +72,9 @@ class Posterior(object):
         Computes MCMC convergence diagnostic metrics: effective sample size and
         R-hat. See also Appendix C of the Manuscript for further information.
         '''
-        dfdiagnostic = az.summary(self.samples.unstack(), kind='diagnostics')
+        dfdiagnostic = az.summary(self.samples.unstack(), 
+                                  var_names = ['beta', 'eta', 'deltas', 'z'],
+                                  kind='diagnostics')
         if verbosity:
             print('Total number of variables:', len(dfdiagnostic))
             print('Variables where effective sample size is below 400:',
@@ -147,8 +149,10 @@ class Posterior(object):
         '''
         if 'z' not in self.samples:
             raise ValueError('Requires access to posterior samples of z')
+        # sam_logIM = mu_B_S[:, None] + (L_BB_S @ self.samples.z.values)
+        # return xr.DataArray(sam_logIM, coords=[self.samples.sid, self.samples.sample])
         return mu_B_S[:, None] + (L_BB_S @ self.samples.z.values)
-  
+
     def plot_frag_funcs(self, ax, bc, im, color, ds_subset = None,
                         kwargsm=dict(), includeCI: bool=True, 
                         kwargsCI = {'alpha': 0.2}):
@@ -257,8 +261,8 @@ class PosteriorPredictiveIM(object):
 
             L_BB_S (ArrayLike): Lower Cholesky Decomposition of Sigma_BB_S
 
-            full_cov (bool): if True, generate samples from the multivariate posterior predictive
-                            if False, generate samples from the univariate posterior predictive
+            full_cov (bool): if True, generate correlated samples from the posterior predictive
+                            if False, generate independent samples from the posterior predictive
 
         Returns:
             sam_logIM (ArrayLike): Samples from the posterior predictive IM at the target_sites
@@ -271,25 +275,26 @@ class PosteriorPredictiveIM(object):
         # Mean and covariance matrix of logIM at target sites conditional on station data
         mu_T_S, Sigma_TT_S = self.gpr.predict(target_sites, full_cov = full_cov)
 
-        sam_logIM = self._sampler(seed, z_samples, Sigma_TB, Sigma_ST, 
+        rng_key = jax.random.PRNGKey(seed)
+        sam_logIM = self._sampler(rng_key, z_samples, Sigma_TB, Sigma_ST, 
                                mu_T_S, Sigma_TT_S, L_BB_S, full_cov=full_cov)
         return sam_logIM
 
     def _precompute(self):
-        Sigma_SS = self.gpr.getCov(self.gpr.sites)
-        Sigma_SS = Sigma_SS + np.eye(self.gpr.sites.n_sites)*self.jitter
-        self.L_SS = np.linalg.cholesky(Sigma_SS)
+        # Sigma_SS = self.gpr.getCov(self.gpr.sites)
+        # Sigma_SS = Sigma_SS + np.eye(self.gpr.sites.n_sites)*self.jitter
+        # self.L_SS = np.linalg.cholesky(Sigma_SS)
         # (L_SS)^-1 Sigma_SB
-        self.A_SB = linalg.solve_triangular(self.L_SS,
+        self.A_SB = linalg.solve_triangular(self.gpr._L,
                     self.gpr.getCov(self.gpr.sites, self.survey_sites),
                     lower=True)
 
-    def _sampler(self, seed, z_samples, Sigma_TB, Sigma_ST, 
+    def _sampler(self, rng_key, z_samples, Sigma_TB, Sigma_ST, 
                                mu_T_S, Sigma_TT_S, L_BB_S, full_cov):
-        rng_key = jax.random.PRNGKey(seed)
+        
         num_samples = z_samples.shape[1]
         # (L_SS)^-1 Sigma_ST
-        A_ST = jax.scipy.linalg.solve_triangular(self.L_SS, Sigma_ST, lower=True)
+        A_ST = jax.scipy.linalg.solve_triangular(self.gpr._L, Sigma_ST, lower=True)
         # Covariance matrix between logIM at target and survey sites conditional on station data
         Sigma_TB_S = Sigma_TB - (A_ST.T @ self.A_SB)
         # (L_BB_S)^-1 Sigma_BT_S
