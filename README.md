@@ -1,4 +1,4 @@
-# Bayesian estimation of empirical seismic fragility functions
+# BayesFrag: Bayesian estimation of empirical seismic fragility functions
 
 This repository is currently under development. The links do not yet work.
 
