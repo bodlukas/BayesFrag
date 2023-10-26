@@ -7,8 +7,8 @@ import xarray as xr
 import jax
 import jax.numpy as jnp
 from scipy import linalg
-from modules.utils import Sites
-from modules.shakemap import GPR
+from bayesfrag.sites import Sites
+from bayesfrag.gpr import GPR
 #-----------
 # Object to store and plot posterior results from MCMC
 #-----------
