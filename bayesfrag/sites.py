@@ -1,3 +1,5 @@
+# ADD COPYRIGHT AND LICENSE
+
 import numpy as np
 import pandas as pd
 
@@ -59,8 +61,10 @@ class Sites(object):
             df (DataFrame): Dataframe with length n_sites and columns specified in 
                             column_mapping
 
-            column_mapping (dict): Dictionary with a mapping between site attributs (see above)
-                                    and column names in the data frame
+            column_mapping (dict): Dictionary with a mapping between site attributes (see above)
+                                    and column names in the data frame, e.g., 
+                                    {'coordinates': ['Longitude, 'Latitude'],
+                                     'mu_logIM': 'mean_logPGA', ...}
 
             coorunits (str, optional): Specify the units for the coordinates
                 - 'decdeg'  : Longitude and Latitude in decimal degrees

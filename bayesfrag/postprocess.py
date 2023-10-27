@@ -1,9 +1,10 @@
+# ADD COPYRIGHT AND LICENSE
+
 import numpy as np
 from scipy import stats
 import arviz as az
 import pandas as pd
 import xarray as xr
-# JAX-related
 import jax
 import jax.numpy as jnp
 from scipy import linalg
@@ -48,7 +49,10 @@ class Posterior(object):
                 Minimally required attributes consist of:
                 list_bc: A list with all considered building classes, e.g., ['A', 'B', ...]
                 list_ds: A list with all considered damage states, e.g., [0, 1, 2, 3, 4, 5]
-                im_string: String with the considered IM, e.g., 'PGA', 'SAT0_300' 
+
+                Following additional attributes are stored with the data:
+                IM: String with the considered IM, e.g., 'PGA', 'SAT0_300' 
+                IM_unit: String with the unit of the considered IM, e.g., 'g [m/s2]'
                 GMM: The used ground motion model, e.g., ChiouYoungs2014Italy 
                 SCM: The used spatial correlation model, e.g., BodenmannEtAl2023            
         """       
@@ -61,10 +65,11 @@ class Posterior(object):
                                     "deltas": ["bc", "ds2+"],
                                     "z": ["sid"]})
         res_az.posterior = res_az.posterior.rename_vars({'eta1': 'eta'})
-        res_az.posterior.attrs['IM'] = args['im_string']
-        res_az.posterior.attrs['IM_unit'] = 'g [m/s2]'
-        res_az.posterior.attrs['GMM'] = args['GMM']
-        res_az.posterior.attrs['SCM'] = args['SCM']
+        for attr in ['IM', 'IM_unit', 'GMM', 'SCM']:
+            if attr in args.keys():
+                res_az.posterior.attrs[attr] = args[attr]
+            else:
+                res_az.posterior.attrs[attr] = 'na'
         return cls(xarray_samples = az.extract(res_az.posterior))    
 
     def get_diagnostics(self, verbosity: bool = True):

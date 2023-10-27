@@ -1,3 +1,5 @@
+# ADD COPYRIGHT AND LICENSE
+
 import numpy as np
 import warnings
 
@@ -99,6 +101,7 @@ class EspositoIervolino2012(SpatialCorrelationModel):
         super().__init__(im_string)
         self.corr_range = self._get_parameter_range(dataset)
         self.name = 'EspositoIervolino2012_' + dataset
+        self._required = ['coor'] # Required site attributes
 
     def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None):
         self.check_attributes(sites1)
