@@ -58,6 +58,11 @@ def get_oq_args(args):
         im_list = [oq.imt.SA(T)]
     return gmm, obs_str, im_list 
 
+def get_epiazimuth(rupture, sites_mesh):
+    lon, lat = rupture.hypocenter.longitude, rupture.hypocenter.latitude
+    lons, lats = sites_mesh.lons, sites_mesh.lats    
+    return oq.geo.geodetic.fast_azimuth(lon, lat, lons, lats)
+
 def get_RuptureContext(rupture, sites_mesh, sites_vs30, 
                 sites_vs30measured=None, sites_z1pt0=None):
 
@@ -116,7 +121,7 @@ def get_gmm_res(filepath, rupture, args):
 
     if args['GMM'] == 'ChiouYoungs2014Italy':
         # Epicentral azimuth is required for spatial correlation model of BodenmannEtAl2023.
-        res['epiazimuth'] = rupture.surface.get_azimuth(sites_mesh).squeeze()
+        res['epiazimuth'] = get_epiazimuth(rupture, sites_mesh).squeeze()
 
     if filepath.split('.')[0] == 'stations':
         res['obs_logIM'] = df[obs_str].values
