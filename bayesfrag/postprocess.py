@@ -38,6 +38,13 @@ class Posterior(object):
         self.n_ds = len(self.samples.ds.values) + 1
 
     @classmethod
+    def from_netcdf(cls, filepath: str):
+
+        ds = xr.load_dataset(filepath)
+        return cls(xarray_samples = az.extract(ds))
+
+
+    @classmethod
     def from_mcmc(cls, numpyro_mcmc, args):
         """
         Initialize object directly from the numpyro mcmc object used for inference.
@@ -65,7 +72,7 @@ class Posterior(object):
                                     "deltas": ["bc", "ds2+"],
                                     "z": ["sid"]})
         res_az.posterior = res_az.posterior.rename_vars({'eta1': 'eta'})
-        for attr in ['IM', 'IM_unit', 'GMM', 'SCM']:
+        for attr in ['IM', 'IM_unit', 'GMM', 'SCM', 'seed_subsampling', 'subsample_number']:
             if attr in args.keys():
                 res_az.posterior.attrs[attr] = args[attr]
             else:
@@ -345,6 +352,11 @@ class PointEstimates(object):
         # + 1 to include damage state 0 (i.e., no damage)
         self.n_ds = len(self.params.ds.values) + 1
 
+    @classmethod
+    def from_netcdf(cls, filepath: str):
+
+        ds = xr.load_dataset(filepath)
+        return cls(xarray_params = ds)
 
     @classmethod
     def from_dict(cls, res_dict, args):
@@ -358,9 +370,12 @@ class PointEstimates(object):
                 Minimally required attributes consist of:
                 list_bc: A list with all considered building classes, e.g., ['A', 'B', ...]
                 list_ds: A list with all considered damage states, e.g., [0, 1, 2, 3, 4, 5]
-                im_string: String with the considered IM, e.g., 'PGA', 'SAT0_300' 
+
+                Following additional attributes are stored with the data:
+                IM: String with the considered IM, e.g., 'PGA', 'SAT0_300' 
+                IM_unit: String with the unit of the considered IM, e.g., 'g [m/s2]'
                 GMM: The used ground motion model, e.g., ChiouYoungs2014Italy 
-                SCM: The used spatial correlation model, e.g., BodenmannEtAl2023            
+                SCM: The used spatial correlation model, e.g., BodenmannEtAl2023           
         """   
         betas = xr.DataArray(res_dict['beta'], dims = ['bc'], 
                     coords = [args['list_bc']], 
@@ -375,10 +390,11 @@ class PointEstimates(object):
                                 coords = [args['list_bc'], coor_ds], 
                                 name = key)
         ds = ds.rename_vars({'eta1': 'eta'})
-        ds.attrs['IM'] = args['im_string']
-        ds.attrs['IM_unit'] = 'g [m/s2]'
-        ds.attrs['GMM'] = args['GMM']
-        ds.attrs['SCM'] = args['SCM']
+        for attr in ['IM', 'IM_unit', 'GMM', 'SCM']:
+            if attr in args.keys():
+                ds.attrs[attr] = args[attr]
+            else:
+                ds.attrs[attr] = 'na'
         return cls(xarray_params = ds)    
 
     def get_fragparams(self, dataframe = True, option = 'thetas'):
@@ -435,7 +451,7 @@ class PointEstimates(object):
         self.params['etas'] = (['bc', 'ds'], etas)
         self.params['etas'] = self.params['etas'].assign_coords({"ds": coords})
   
-    def plot_frag_funcs(self, ax, bc, im, color = None, kwargs=dict()):
+    def plot_frag_funcs(self, ax, bc, im, color = None, ds_subset = None, kwargs=dict()):
         '''
         Plot the fragility functions using the posterior samples from the Bayesian 
         estimation approach.
@@ -452,13 +468,18 @@ class PointEstimates(object):
             ds_subset (Optional): If provided, only the functions for these damage states will 
                 be plotted.
 
+            ds_subset (Optional): If provided, only the functions for these damage states will 
+                be plotted.
+
             kwargs (Optional, dict): Further matplotlib attributes that control the mean function,
                 e.g., {'linewidth': 1.75, 'linestyle': '--'}
 
         '''  
         kwargs['color'] = color
         betas = self.params.sel({'bc': bc}).beta.values
-        for i, ds in enumerate(self.params.ds.values):
+        if ds_subset is None: ds_list = self.params.ds.values
+        else: ds_list = ds_subset        
+        for i, ds in enumerate(ds_list):
             if i > 0: kwargs['label'] = None
             etas = self.params.sel({'bc': bc, 'ds': ds}).etas.values
             ax.plot(im, stats.norm.cdf(np.log(im)/betas - etas), 
