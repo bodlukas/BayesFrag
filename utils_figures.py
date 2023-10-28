@@ -1,8 +1,14 @@
+#
+#
+
+'''
+Utilities for reproducing the figures from the manuscript.
+
+Check out figures.ipynb for illustrations.
+'''
+
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
-import os
-import xarray as xr
 
 textwidth = 5.905 #inches
 def golden_figsize(width):
