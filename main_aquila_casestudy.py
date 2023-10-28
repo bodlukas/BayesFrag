@@ -154,7 +154,7 @@ def main_mcmc(path_data, path_res, args, gpr, save = True, predict_map = False):
     posterior, L_BB_S = perform_mcmc(gpr, survey_data, args, return_L = True)
 
     if save:
-        savestr = ('Bayesian_frag_Aquila_im' + args['IM'] + '_GMMcombo' + str(gmmcombo) +                     
+        savestr = ('Bayesian_frag_Aquila_im' + args['IM'] + '_GMMcombo' + str(args['gmmcombo']) +                     
                     '_seedsubsampling' + str(args['seed_subsampling']) + '.nc')
         posterior.save_as_netcdf(path_res + savestr)
 
@@ -170,7 +170,7 @@ def main_mcmc(path_data, path_res, args, gpr, save = True, predict_map = False):
         resIM = {'mean_logIM': np.hstack(mean_logIM), 'std_logIM': np.hstack(std_logIM)}
         del mean_logIM, std_logIM, map_sites, postpredIM, L_BB_S, survey_data
         if save:
-            savestr = ('PosteriorIM_Aquila_im' + args['IM'] + '_GMMcombo' + str(gmmcombo) + 
+            savestr = ('PosteriorIM_Aquila_im' + args['IM'] + '_GMMcombo' + str(args['gmmcombo']) + 
                             '_seedsubsampling' + str(args['seed_subsampling']) + '.nc')
             np.savez(path_res + savestr, **resIM)
         else:
@@ -199,7 +199,7 @@ def main_mle(path_data, path_res, args, gpr, save = True, predict_map = False):
     params_fixedIM = perform_mle(gpr, survey_data, args)
 
     if save:
-        savestr = ('FixedIM_frag_Aquila_im' + args['IM'] + '_GMMcombo' + str(gmmcombo) + '.nc')
+        savestr = ('FixedIM_frag_Aquila_im' + args['IM'] + '_GMMcombo' + str(args['gmmcombo']) + '.nc')
         params_fixedIM.save_as_netcdf(path_res + savestr)
 
     if predict_map:
@@ -208,7 +208,7 @@ def main_mle(path_data, path_res, args, gpr, save = True, predict_map = False):
         resIM = {'mean_logIM': mean_logIM, 'std_logIM': np.sqrt(var_logIM)}
         del mean_logIM, var_logIM, map_sites
         if save:
-            savestr = ('PriorIM_Aquila_im' + args['IM'] + '_GMMcombo' + str(gmmcombo) + '.nc')
+            savestr = ('PriorIM_Aquila_im' + args['IM'] + '_GMMcombo' + str(args['gmmcombo']) + '.nc')
             np.savez(path_res + savestr, **resIM)
         else: 
             return params_fixedIM, resIM

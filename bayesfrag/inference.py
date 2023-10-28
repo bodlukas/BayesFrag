@@ -9,47 +9,6 @@ from numpyro.infer import MCMC, NUTS, SVI, Trace_ELBO
 from bayesfrag.utils import get_pmf_ds_logIM
 from bayesfrag.postprocess import Posterior, PointEstimates
 
-# def Model_MCMC(mu, L, ds, bc, parampriors):
-#     '''
-#     Prior generative model encoded in Numpyro
-
-#     args:
-#         mu (ArrayLike): Mean of logIM at survey sites conditional on station data
-#             dimension: (n_sites, )
-
-#         L (ArrayLike): Lower Cholesky decomposition of the covariance matrix of logIM
-#                         at survey sites conditional on station data
-#             dimension: (n_sites, n_sites)
-
-#         ds (ArrayLike): Observed damage states (encoded with integers)
-#             dimension: (n_sites,)
-
-#         bc (ArrayLike): Observed building classes (encoded with integers)
-#             dimension: (n_sites,)
-
-#         parampriors (dict): Prior distributions for fragility function parameters. See
-#                             example of default_priors above.
-#     '''
-
-#     N = ds.shape[0] # Number of data points
-
-#     # Prior sampling distributions of fragility function parameters
-#     eta1 = numpyro.sample('eta1', parampriors['eta1']) 
-#     deltas = numpyro.sample('deltas', parampriors['deltas']) 
-#     beta = numpyro.sample('beta', parampriors['beta']) 
-
-#     # Prior sampling distribution of z
-#     z = numpyro.sample('z', dist.Normal(jnp.zeros(N), 1) )
-
-#     # Transform z to logIM at survey sites
-#     logIM = mu + jnp.matmul(L, z)
-
-#     # Compute damage state probabilities
-#     p = get_pmf_ds_logIM(logIM, bc, eta1, deltas, beta).T
-
-#     # Likelihood
-#     numpyro.sample('obs', dist.Categorical(probs = p), obs = ds)
-
 #---------
 # Bayesian inference with uncertain IM values
 #---------
