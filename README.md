@@ -10,8 +10,9 @@ This repository contains the code to perform Bayesian parameter estimation for e
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
-![alt text](https://github.com/bodlukas/empirical-fragility-bayes/blob/main/data/bayesfrag-schema_darks.png#gh-dark-mode-only)
-![alt text](https://github.com/bodlukas/empirical-fragility-bayes/blob/main/data/bayesfrag-schema_whites.png#gh-light-mode-only)
+![alt text](https://github.com/bodlukas/empirical-fragility-bayes/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_darks.png#gh-dark-mode-only)
+![alt text](https://github.com/bodlukas/empirical-fragility-bayes/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_whites.png#gh-light-mode-only)
+
 
 ## Getting started
 
