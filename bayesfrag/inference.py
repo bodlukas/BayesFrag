@@ -6,8 +6,8 @@ import numpyro
 import numpyro.distributions as dist
 from numpyro.infer import MCMC, NUTS, SVI, Trace_ELBO
 
-from bayesfrag.utils import get_pmf_ds_logIM
-from bayesfrag.postprocess import Posterior, PointEstimates
+from utils import get_pmf_ds_logIM
+from postprocess import Posterior, PointEstimates
 
 #---------
 # Bayesian inference with uncertain IM values

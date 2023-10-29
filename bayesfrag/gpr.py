@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import linalg
 
-from bayesfrag.sites import Sites
-from bayesfrag.spatialcorrelation import SpatialCorrelationModel
+from sites import Sites
+from spatialcorrelation import SpatialCorrelationModel
 
 class GPR(object):
     '''

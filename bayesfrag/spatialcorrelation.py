@@ -3,7 +3,7 @@
 import numpy as np
 import warnings
 
-from bayesfrag.sites import Sites
+from sites import Sites
 # ['PGA', 'SAT0_200', 'SAT0_300', 'SAT0_600']
 
 EARTHRADIUS = 6371.0 # Radius of earth in km.
