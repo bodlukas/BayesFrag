@@ -18,6 +18,14 @@ PlanarSurface = oq.geo.surface.planar.PlanarSurface
 BaseRupture = oq.source.rupture.BaseRupture
 
 def get_rupture():
+    '''
+    The rupture metadata is from ESM: 
+    https://esm-db.eu/#/event/IT-2009-0009 
+
+    The rupture geometry is from INGV: 
+    http://shakemap.ingv.it/shake4/downloadPage.html?eventid=1895389 
+    The latter is identical to the ESM rupture geometry!
+    '''
     f = open('rupture.json')
     rup_temp = json.load(f)
     f.close()
@@ -88,10 +96,10 @@ def get_RuptureContext(rupture, sites_mesh, sites_vs30,
 def compute_GMM(gmm, im_list, rupture_context):
     n = len(rupture_context.vs30)
     nim = len(im_list)
-    mean = np.zeros([nim, n])
-    sigma = np.zeros([nim, n])
-    tau = np.zeros([nim, n])
-    phi = np.zeros([nim, n])
+    mean = sigma = tau = phi = np.zeros([nim, n])
+    # sigma = np.zeros([nim, n])
+    # tau = np.zeros([nim, n])
+    # phi = np.zeros([nim, n])
     gmm.compute(rupture_context, im_list, mean, sigma, tau, phi)
     return {'mu_logIM': mean.squeeze(), 
             'tau_logIM': tau.squeeze(), 
@@ -120,7 +128,6 @@ def get_gmm_res(filepath, rupture, args):
     res = compute_GMM(gmm, im_list, rupture_context)    
 
     if args['GMM'] == 'ChiouYoungs2014Italy':
-        # Epicentral azimuth is required for spatial correlation model of BodenmannEtAl2023.
         res['epiazimuth'] = get_epiazimuth(rupture, sites_mesh).squeeze()
 
     if filepath.split('.')[0] == 'stations':
