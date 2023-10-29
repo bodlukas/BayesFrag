@@ -8,8 +8,8 @@ import xarray as xr
 import jax
 import jax.numpy as jnp
 from scipy import linalg
-from sites import Sites
-from gpr import GPR
+from .sites import Sites
+from .gpr import GPR
 #-----------
 # Object to store and plot posterior results from MCMC
 #-----------
