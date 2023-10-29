@@ -12,8 +12,8 @@ This repository contains the code to perform Bayesian parameter estimation for e
 
 Seismic fragility functions provide a relationsship between damage and a ground motion intensity measure (IM).Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
 
-![alt text](https://github.com/bodlukas/empirical-fragility-bayes/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_darks.png#gh-dark-mode-only)
-![alt text](https://github.com/bodlukas/empirical-fragility-bayes/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_whites.png#gh-light-mode-only)
+![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_darks.png#gh-dark-mode-only)
+![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_whites.png#gh-light-mode-only)
 
 To avoid any additional dependency on a specific ground motion model (GMM) library, the GMM estimates are computed prior and separate to the fragility parameter estimation.
 
