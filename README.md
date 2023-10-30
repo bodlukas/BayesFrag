@@ -1,7 +1,5 @@
 # BayesFrag: Bayesian estimation of empirical seismic fragility functions
 
-This repository is currently under development.
-
 <!---
 [![DOI](https://zenodo.org/badge/542139247.svg)](https://zenodo.org/badge/latestdoi/542139247)
 -->
@@ -37,14 +35,20 @@ The folder [results](results/) contains the results illustrated in the manuscrip
 
 The notebook [figures.ipynb](figures.ipynb) reproduces the figures shown in the manuscript using utility functions from [utils_plotting.py](utils_plotting.py).
 
-The script [main_aquila_casestudy.py](main_aquila_casestudy.py) performs all computations - from parameter estimation to post-processing - to reproduce the results presented in the paper (and stored in the folder [results/aquila](results/aquila/)). This script is computationally expensive and causes high memory demand. The computations were performed on a NVIDIA V100 tensor core GPU with 25 GB of RAM and we do not recommend to run this script on a standard personal computer.
+The script [main_aquila_casestudy.py](main_aquila_casestudy.py) performs all computations - from parameter estimation to post-processing - to reproduce the results presented in the paper (and stored in the folder [results](results/)). This script is computationally expensive and causes high memory demand. The computations were performed on a NVIDIA V100 tensor core GPU with 25 GB of RAM and we do not recommend to run this script on a standard personal computer.
 
 The required packages are specified in [environment.yml](environment.yml).
 
 ## Installation
 
 BayesFrag can be installed by using 
-```python
+```
 pip install bayesfrag
 ```
-We performed model estimation on Linux and did not test other opearting systems. To perform model estimation on your local machine, you can set up a Windows Subsystem for Linux ([WSL](https://learn.microsoft.com/en-us/windows/wsl/install)). Then install [miniconda](https://docs.conda.io/en/latest/miniconda.html) and create an environment as `conda env create -f environment.yml`.
+It is good practice to do the installation in a new virtual environment, for example with [miniconda](https://docs.conda.io/en/latest/miniconda.html). BayesFrag was tested with Python 3.10.12.
+
+## Acknowledgments
+We gratefully acknowledge support from the ETH Risk Center ("DynaRisk", Grant Nr. 395 2018-FE-213).
+
+## Licence
+BayesFrag is released under the [BSD-3-Clause license](LICENSE.md)

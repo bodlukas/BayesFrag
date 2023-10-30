@@ -10,8 +10,8 @@ performed the computations on a NVIDIA V100 tensor core
 GPU with 25 GB of RAM, and parallelized various
 for-loops.
 
-For a thorough explanation of the estimation and 
-post-processing computations check out the tutorials.
+Check out the tutorials for a thorough explanation of the 
+estimation and post-processing computations.
 '''
 
 import os
