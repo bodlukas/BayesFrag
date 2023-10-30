@@ -8,7 +8,7 @@ BayesFrag is an open-source Python library to perform Bayesian parameter estimat
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
-Seismic fragility functions provide a relationsship between damage and a ground motion intensity measure (IM).Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
+Seismic fragility functions provide a relationsship between damage and a ground motion intensity measure (IM). Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
 
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_white.png#gh-light-mode-only)
@@ -19,16 +19,16 @@ To avoid any additional dependency on a specific ground motion model (GMM) libra
 
 To allow for a smooth start, we offer three tutorials that can be opened on a hosted Jupyter notebook service (e.g., Google Colab).  
 
-- The [first tutorial](Tutorial1.ipynb) reproduces the results of the one-dimensional example from the manuscript and explains the implementation of the proposed estimation approach. <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial1.ipynb">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+- The [first tutorial](Tutorial1.ipynb) reproduces the results of the one-dimensional example from the manuscript and explains the implementation of the proposed estimation approach: <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial1.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" height="15"/>
 </a>
 
-- The [second tutorial](Tutorial2.ipynb) shows how the Bayesian approach can be applied to a realistic damage survey data set. The notebook can easily be modified and extended such that analysts can apply BayesFrag to their data sets of interest. <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial2.ipynb">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+- The [second tutorial](Tutorial2.ipynb) shows how the Bayesian approach can be applied to a realistic damage survey data set. The notebook can easily be modified and extended such that analysts can apply BayesFrag to their data sets of interest: <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial2.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" height="15"/>
 </a>
 
-- The [third tutorial](Tutorial3.ipynb) explains the computation of the GMM estimates, which is done prior and separate to the fragility parameter estimation. <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial3.ipynb">
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+- The [third tutorial](Tutorial3.ipynb) explains the computation of the GMM estimates, which is done prior and separate to the fragility parameter estimation: <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial3.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab" height="15"/>
 </a>
 
 ## Structure
@@ -43,11 +43,9 @@ The notebook [figures.ipynb](figures.ipynb) reproduces the figures shown in the 
 
 The script [main_aquila_casestudy.py](main_aquila_casestudy.py) performs all computations - from parameter estimation to post-processing - to reproduce the results presented in the paper (and stored in the folder [results](results/)). This script is computationally expensive and causes high memory demand. The computations were performed on a NVIDIA V100 tensor core GPU with 25 GB of RAM and we do not recommend to run this script on a standard personal computer.
 
-The required packages are specified in [environment.yml](environment.yml).
-
 ## Installation
 
-BayesFrag can be installed by using 
+BayesFrag can be installed as 
 ```
 pip install bayesfrag
 ```
@@ -57,7 +55,7 @@ It is good practice to do the installation in a new virtual environment, for exa
 BayesFrag is envisioned as an open-source software to be developed in collaboration with the community. If you are interested in contributing to the project or have any questions, comments, or suggestions, please contact Lukas Bodenmann at bodenmann (at) ibk.baug.ethz.ch.
 
 ## Acknowledgments
-We gratefully acknowledge support from the ETH Risk Center ("DynaRisk", Grant Nr. 395 2018-FE-213).
+We gratefully acknowledge support from the [ETH Risk Center](https://riskcenter.ethz.ch/) ("DynaRisk", Grant Nr. 395 2018-FE-213) and from the [Chair of Earthquake Engineering and Structural Dynamics](https://stojadinovic.ibk.ethz.ch/) at ETH Zurich.
 
 ## Licence
-BayesFrag is released under the [BSD-3-Clause license](LICENSE)
+BayesFrag is released under the [BSD-3-Clause license](LICENSE).
