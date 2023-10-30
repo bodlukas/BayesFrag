@@ -1,5 +1,12 @@
 [build-system]
-requires = ["setuptools>=68.2.2"]
+requires = [
+    "setuptools>=68.2.2",
+    "numpyro>=0.13.2",
+    "pandas>=1.5.3",
+    "arviz>=0.15.1",
+    "matplotlib>=3.7.1",
+    "ipykernel>=6.25.2",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,6 +16,8 @@ authors = [
 ]
 description = "Bayesian estimation of empirical seismic fragility functions"
 requires-python = ">=3.10"
+version = "0.0.1"
+readme = "README.md"
 license = {text = "BSD-3-Clause"}
 dependencies = [
     "numpyro>=0.13.2",
@@ -17,14 +26,9 @@ dependencies = [
     "matplotlib>=3.7.1",
     "ipykernel>=6.25.2",
 ]
-dynamic = ["version", "readme"]
 
 [tool.setuptools]
 packages = ["bayesfrag"]
-
-[tool.setuptools.dynamic]
-version = {attr = "bayesfrag.VERSION"}
-readme = {file = "README.md"}
 
 [project.urls]
 "Repository" = "https://github.com/bodlukas/BayesFrag"
