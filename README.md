@@ -4,14 +4,14 @@
 [![DOI](https://zenodo.org/badge/542139247.svg)](https://zenodo.org/badge/latestdoi/542139247)
 -->
 
-This repository contains the code to perform Bayesian parameter estimation for empirical seismic fragility models. The methodology is presented in :
+BayesFrag is an open-source Python library to perform Bayesian parameter estimation of empirical seismic fragility models. The methodology is presented in :
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
 Seismic fragility functions provide a relationsship between damage and a ground motion intensity measure (IM).Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
 
-![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_darks.png#gh-dark-mode-only)
-![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_whites.png#gh-light-mode-only)
+![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
+![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_white.png#gh-light-mode-only)
 
 To avoid any additional dependency on a specific ground motion model (GMM) library, the GMM estimates are computed prior and separate to the fragility parameter estimation.
 
@@ -52,6 +52,9 @@ BayesFrag can be installed by using
 pip install bayesfrag
 ```
 It is good practice to do the installation in a new virtual environment, for example with [miniconda](https://docs.conda.io/en/latest/miniconda.html). BayesFrag was tested with Python 3.10.12.
+
+## Contact
+BayesFrag is envisioned as an open-source software to be developed in collaboration with the community. If you are interested in contributing to the project or have any questions, comments, or suggestions, please contact Lukas Bodenmann at bodenmann (at) ibk.baug.ethz.ch.
 
 ## Acknowledgments
 We gratefully acknowledge support from the ETH Risk Center ("DynaRisk", Grant Nr. 395 2018-FE-213).
