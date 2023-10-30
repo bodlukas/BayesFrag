@@ -5,7 +5,7 @@ requires = [
     "pandas>=1.5.3",
     "arviz>=0.15.1",
     "matplotlib>=3.7.1",
-    "ipykernel>=6.25.2",
+    "ipykernel>=5.5.6",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -24,7 +24,7 @@ dependencies = [
     "pandas>=1.5.3",
     "arviz>=0.15.1",
     "matplotlib>=3.7.1",
-    "ipykernel>=6.25.2",
+    "ipykernel>=5.5.6",
 ]
 
 [tool.setuptools]
