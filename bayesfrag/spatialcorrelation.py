@@ -3,22 +3,25 @@
 
 import numpy as np
 import warnings
-
+from typing import Optional
+from numpy.typing import ArrayLike
 from .sites import Sites
-# ['PGA', 'SAT0_200', 'SAT0_300', 'SAT0_600']
 
 EARTHRADIUS = 6371.0 # Radius of earth in km.
 
 class SpatialCorrelationModel(object):
     """ Base class for spatial correlation models for within-event residuals 
-    of ground-motion intensity measures
+    of ground-motion intensity measures.
     """
-    def __init__(self, im_string: str):
+    def __init__(self, im_string: str) -> None:
         """
-        Args:
-            im_string (str): Indicate for which im to compute correlations.
+        Parameters
+        ----------
+        im_string : str 
+            Indicate for which IM to compute correlations. 
+            For PGA use 'PGA', for SA(T=0.3s) use 'SAT0_300'.
         """        
-        # self.im = imt.from_string(im_string)
+
         if im_string == 'PGA':
             self.T = 0.0
         else: 
@@ -27,7 +30,7 @@ class SpatialCorrelationModel(object):
         self._required = ['coor']
         self.name = 'none'
 
-    def check_attributes(self, sites: Sites):
+    def check_attributes(self, sites: Sites) -> None:
         check = [getattr(sites, attr) for attr in self._required]
         if any(x is None for x in check):
             mask = [x is None for x in check]            
@@ -35,7 +38,7 @@ class SpatialCorrelationModel(object):
                              'requires additional site attributes ' + 
                              ', '.join(np.array(self._required)[mask]))
 
-    def get_euclidean_distance_matrix(self, sites1: Sites, sites2=None):
+    def get_euclidean_distance_matrix(self, sites1: Sites, sites2: Optional[Sites] = None) -> ArrayLike: 
         """Computes Euclidean distance matrix
 
         Computes the distance from each site in sites1 to every other site in 
@@ -45,12 +48,18 @@ class SpatialCorrelationModel(object):
         http://williams.best.vwh.net/avform.htm#Dist , which is the same algortihm 
         used by OpenQuake (v3.16.0).
 
-        Args:
-            sites1 (Sites): Sites for which to compute distance matrix
-            sites2 (Sites, optional): If not None distance matrix between
-                sites1 and sites2 is computed. Defaults to None.
-        Returns:
-            distances (np.array): Distance matrix in km
+        Parameters
+        ----------
+        sites1 : Sites
+            Primary sites for which to compute distance matrix.
+        sites2 : Sites, optional
+            Secondary sites. If provided, distance matrix between primary 
+            and secondary sites. 
+
+        Returns
+        -------
+        distances : ArrayLike
+            Distance matrix in km
         """
         X1 = sites1.coor
         if sites2 is None: X2 = X1
@@ -92,19 +101,42 @@ class EspositoIervolino2012(SpatialCorrelationModel):
 
     '''
 
-    def __init__(self, im_string, dataset='it'):
+    def __init__(self, im_string: str, dataset: str='it') -> None:
         '''
-        Args:
-            dataset (str): Indicate which parameters to be used. 
-                'it': Parameters estimated from Italian data set
-                'esm': Parameters estimated from European data set
+        Parameters
+        ----------
+        im_string : str 
+            Indicate for which IM to compute correlations. 
+            For PGA use 'PGA', for SA(T=0.3s) use 'SAT0_300'.
+        dataset : {'it', 'esm'}, defaults to 'it'     
+            Indicate which parameters to be used.  
+            'it': Parameters estimated from Italian data set
+            'esm': Parameters estimated from European data set
         '''
         super().__init__(im_string)
         self.corr_range = self._get_parameter_range(dataset)
         self.name = 'EspositoIervolino2012_' + dataset
         self._required = ['coor'] # Required site attributes
 
-    def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None):
+    def get_correlation_matrix(self, sites1: Sites, sites2: Optional[Sites] = None) -> ArrayLike:
+        ''' Computes correlation matrix
+
+        Computes the correlation coefficient from each site in sites1 to every other site in 
+        site 1, or, if sites2 is provided, to every site in sites2.        
+
+        Parameters
+        ----------
+        sites1 : Sites
+            Primary sites for which to compute correlation matrix.
+        sites2 : Sites, optional
+            Secondary sites. If provided, correlation matrix between primary 
+            and secondary sites. 
+
+        Returns
+        -------
+        correlation : ArrayLike
+            Correlation matrix
+        '''
         self.check_attributes(sites1)
         if sites2 is not None: self.check_attributes(sites2)
         dist_mat = self.get_euclidean_distance_matrix(sites1, sites2)
@@ -141,12 +173,19 @@ class BodenmannEtAl2023(SpatialCorrelationModel):
     Note: For PGA, we take the parameters obtained for SA(T=0.01s).
     '''
 
-    def __init__(self, im_string):
+    def __init__(self, im_string: str) -> None:
+        '''
+        Parameters
+        ----------
+        im_string : str 
+            Indicate for which IM to compute correlations. 
+            For PGA use 'PGA', for SA(T=0.3s) use 'SAT0_300'.
+        '''
         super().__init__(im_string)
         self.name = 'BodenmannEtAl2023'
         self._required = ['coor', 'vs30', 'epiazi'] # Required site attributes
 
-    def get_angular_distance_matrix(self, sites1: Sites, sites2: Sites=None):
+    def get_angular_distance_matrix(self, sites1: Sites, sites2: Optional[Sites] = None) -> ArrayLike:
         '''
         Computes matrix with differences in epicentral azimuth values of sites.
         See also doc of get_euclidean_distance_matrix.
@@ -161,7 +200,7 @@ class BodenmannEtAl2023(SpatialCorrelationModel):
         distances =  np.arccos(np.clip(cos_angle, -1, 1))   
         return distances * 180/np.pi
     
-    def get_soil_dissimilarity_matrix(self, sites1: Sites, sites2: Sites=None):
+    def get_soil_dissimilarity_matrix(self, sites1: Sites, sites2: Optional[Sites] = None) -> ArrayLike:
         '''
         Computes the absolute difference in vs30 values between sites.
         See also doc of get_euclidean_distance_matrix.
@@ -174,7 +213,25 @@ class BodenmannEtAl2023(SpatialCorrelationModel):
         distances = np.abs(vs301 - vs302) 
         return distances
 
-    def get_correlation_matrix(self, sites1: Sites, sites2: Sites=None):
+    def get_correlation_matrix(self, sites1: Sites, sites2: Optional[Sites] = None) -> ArrayLike:
+        ''' Computes correlation matrix
+
+        Computes the correlation coefficient from each site in sites1 to every other site in 
+        site 1, or, if sites2 is provided, to every site in sites2.        
+
+        Parameters
+        ----------
+        sites1 : Sites
+            Primary sites for which to compute correlation matrix.
+        sites2 : Sites, optional
+            Secondary sites. If provided, correlation matrix between primary 
+            and secondary sites. 
+
+        Returns
+        -------
+        correlation : ArrayLike
+            Correlation matrix
+        '''
         self.check_attributes(sites1)
         if sites2 is not None: self.check_attributes(sites2)
         dist_mat_E = self.get_euclidean_distance_matrix(sites1, sites2)

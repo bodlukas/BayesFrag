@@ -4,40 +4,47 @@
 import numpy as np
 from scipy import linalg
 
+from typing import Optional
+from numpy.typing import ArrayLike
+
 from .sites import Sites
 from .spatialcorrelation import SpatialCorrelationModel
 
 class GPR(object):
     '''
-    Computes the distribution of logIM conditional on 
-    observed IMs at seismic network stations.
+    Computes the the parameters of the distribution of logIM conditional 
+    on observed IMs at seismic network stations.
     '''
 
-    def __init__(self, SCM: SpatialCorrelationModel):
+    def __init__(self, SCM: SpatialCorrelationModel) -> None:
         '''
-        Args:
-            SCM (SpatialCorrelationModel): Correlation model
+        Parameters
+        ----------
+        SCM : SpatialCorrelationModel
+            Employed Spatial correlation model
         '''
         self.SCM = SCM
 
-    def getCov(self, sites1: Sites, sites2 = None, full_cov=True):
+    def getCov(self, sites1: Sites, sites2: Optional[Sites] = None, full_cov=True) -> ArrayLike:
         '''
-        Computes covariance matrix
-        if sites2 is None, it computes the covariance matrix 
-        between each site in sites1 to every other site in sites1. 
-        if sites2 is provided, it computes the covariance matrix 
-        between each site in sites1 to each site in sites2.
+        Computes covariance matrix of the multivariate normal distribution 
+        of logIM values conditional on rupture characteristics.
 
-        Args:
+        Parameters
+        ----------
+        sites1 : Sites
+            Primary sites for which to compute covariance matrix.
+        sites2 : Sites, optional
+            Secondary sites. If provided, computes covariance matrix 
+            between primary and secondary sites. 
+        full_cov : bool, defaults to True
+            if True computes full covariance matrix
+            if False computes only the diagonal
 
-            sites1 (Sites): Primary sites
-
-            sites2 (Sites, Optional): Secondary sites
-
-            full_cov (bool): 
-                if True computes full covariance matrix
-                if False computes only the diagonal
-                defaults to True
+        Returns
+        -------
+        cov : ArrayLike
+            Covariance matrix
         '''
         if full_cov:
             corr_mat = self.SCM.get_correlation_matrix(sites1, sites2)
@@ -60,17 +67,18 @@ class GPR(object):
             cov += np.square(np.atleast_1d(sites1.phi_logIM))
         return cov
 
-    def fit(self, sites: Sites, obs_logIM, jitter=1e-6):
+    def fit(self, sites: Sites, obs_logIM: ArrayLike, jitter: float = 1e-6) -> None:
         '''
         Compute and cache variables required for predictions
 
-        Args:
-            sites (Sites): Site collection for seismic stations
-            
-            obs_logIM (ArrayLike): Observed logIM at seismic stations
-
-            jitter (float, Optional): Add for numerical stability
-
+        Parameters
+        ----------
+        sites : Sites
+            Site collection for seismic network stations.
+        obs_logIM : ArrayLike
+            Observed logIM at seismic stations
+        jitter : float, defaults to 1e-6
+            Add for numerical stability
         '''
 
         Sigma_SS = self.getCov(sites)
@@ -81,17 +89,29 @@ class GPR(object):
         self.sites = sites
         self._alpha = linalg.cho_solve((self._L, True), residuals)
 
-    def predict(self, sites_new, full_cov=True):
+    def predict(self, sites_new: Sites, full_cov: bool=True) -> tuple[ArrayLike, ArrayLike]:
         '''
-        Compute the distribution of logIM at target sites conditioned on 
-        observations at station sites
+        Compute the parameters of the normal distribution of logIM 
+        at target sites conditioned on observations at station sites
 
-        Args:
-            sites_new : Site collection for target sites
-            
-            full_cov : if True computes entire covariance matrix, otherwise only 
-                        the diagonal 
-        
+        Parameters
+        ----------
+        sites_new : Sites
+            Site collection for target sites
+        full_cov : bool, defaults to True
+            if True computes full covariance matrix
+            if False computes only the diagonal
+
+        Returns
+        ----------
+        mu_T_S : ArrayLike, dimension (n_sites,)
+            Mean logIM values conditional on station data. 
+            Mean vector of conditional normal distribution.
+        Sigma_TT_S : ArrayLike
+            if full_cov is True: Covariance matrix of conditional
+            normal distribution, dimension (n_sites, n_sites)
+            if full_cov is False: Diagonal of covariance matrix,
+            dimension (n_sites,)
         '''
         Sigma_ST = self.getCov(self.sites, sites_new, full_cov=True)
         Sigma_TT = self.getCov(sites_new, full_cov=full_cov)

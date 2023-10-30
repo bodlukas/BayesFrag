@@ -3,43 +3,38 @@
 
 import numpy as np
 import pandas as pd
+from typing import Optional
+from numpy.typing import ArrayLike
 
 class Sites(object):
     """Wrapper for geographic sites at which to predict ground-motion amplitudes.
     """    
-    def __init__(self, coordinates, mu_logIM, tau_logIM, phi_logIM, 
-                 vs30 = None, epiazimuth = None, coorunits = 'decdeg',
-                 ):
+    def __init__(self, coordinates: ArrayLike, mu_logIM: ArrayLike, tau_logIM: ArrayLike, 
+                phi_logIM: ArrayLike, vs30: Optional[ArrayLike] = None, 
+                epiazimuth: Optional[ArrayLike] = None, coorunits: str = 'decdeg',
+                 ) -> None:
         """Initialize Sites object (collection of n_sites)
 
-        Args:
-            coordinates (ArrayLike): Array with dimension (n_sites, 2)
-                First column: Longitude in decimal degrees OR Easting in km or m
-                Second column: Latitude in decimal degrees OR Northing in km or m
-
-            mu_logIM (ArrayLike): Array with dimension (n_sites,)
-                Mean of logIM as obtained from a GMM
-
-            tau_logIM (ArrayLike): Array with dimension (n_sites,)
-                Standard deviation of between-event residual of logIM 
-                as obtained from a GMM
-
-            phi_logIM (ArrayLike): Array with dimension (n_sites,)
-                Standard deviation of within-event residual of logIM 
-                as obtained from a GMM               
-
-            vs30 (ArrayLike, optional): Vs30 values of the sites in m/s
-                May be required by some spatial correlation models
-            
-            epiazimuth (ArrayLike, optional): Epicentral azimuth in decimal degrees
-                May be required by some spatial correlation models
-
-            coorunits (str, optional): Specify the units for the coordinates
-                - 'decdeg'  : Longitude and Latitude in decimal degrees
-                - 'km'      : Easting and Northing in km
-                - 'm'       : Easting and Northing in m 
-                Defaults to 'decdeg'           
-
+        Parameters
+        ----------
+        coordinates : ArrayLike, dimension (n_sites, 2)
+            First column: Longitude in decimal degrees OR Easting in km or m
+            Second column: Latitude in decimal degrees OR Northing in km or m
+        mu_logIM : ArrayLike, dimension (n_sites,)
+            Mean of logIM as obtained from a GMM
+        tau_logIM : ArrayLike, dimension (n_sites,)
+            Standard deviation of between-event residual of logIM as obtained from a GMM        
+        phi_logIM : ArrayLike, dimension (n_sites,)
+            Standard deviation of within-event residual of logIM as obtained from a GMM
+        vs30 : ArrayLike, optional, dimension (n_sites,)
+            Vs30 values of the sites in m/s
+        epiazimuth : ArrayLike, optional, dimension (n_sites,)
+            Epicentral azimuth in decimal degrees   
+        coorunits : {'decdeg', 'km', 'm'}, optional, defaults to 'decdeg'
+            Specify the units for the coordinates
+            - 'decdeg'  : Longitude and Latitude in decimal degrees
+            - 'km'      : Easting and Northing in km
+            - 'm'       : Easting and Northing in m                     
         """        
         assert coordinates.shape[1] == 2, 'Coordinates should have dimension (n_sites, 2)'
         self.coor = coordinates
@@ -55,23 +50,24 @@ class Sites(object):
         self.coorunits = coorunits
 
     @classmethod
-    def from_df(cls, df: pd.DataFrame(), column_mapping: dict(), coorunits: str = 'decdeg'):
+    def from_df(cls, df: pd.DataFrame, column_mapping: dict, coorunits: str = 'decdeg') -> None:
         """Initialize Sites object (collection of n_sites) from a pandas dataframe
 
-        Args:
-            df (DataFrame): Dataframe with length n_sites and columns specified in 
-                            column_mapping
-
-            column_mapping (dict): Dictionary with a mapping between site attributes (see above)
-                                    and column names in the data frame, e.g., 
-                                    {'coordinates': ['Longitude, 'Latitude'],
-                                     'mu_logIM': 'mean_logPGA', ...}
-
-            coorunits (str, optional): Specify the units for the coordinates
-                - 'decdeg'  : Longitude and Latitude in decimal degrees
-                - 'km'      : Easting and Northing in km
-                - 'm'       : Easting and Northing in m 
-                Defaults to 'decdeg'           
+        Parameters
+        ----------
+        df : Pandas dataframe, dimension (n_sites, 2)
+            Dataframe with length n_sites and site attributes specified in the columns
+            of column_mapping.
+        column_mapping: dict, 
+            Dictionary with a mapping between site attributes (see above)
+            and column names in the data frame, e.g., 
+            {'coordinates': ['Longitude, 'Latitude'],
+                'mu_logIM': 'mean_logPGA', ...}
+        coorunits : {'decdeg', 'km', 'm'}, optional, defaults to 'decdeg'
+            Specify the units for the coordinates
+            - 'decdeg'  : Longitude and Latitude in decimal degrees
+            - 'km'      : Easting and Northing in km
+            - 'm'       : Easting and Northing in m      
 
         """
         params_new = {}

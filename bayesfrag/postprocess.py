@@ -11,6 +11,12 @@ import jax.numpy as jnp
 from scipy import linalg
 from .sites import Sites
 from .gpr import GPR
+
+from numpyro.infer import MCMC
+from typing import Optional
+from jax.typing import ArrayLike
+from jax import Array
+
 #-----------
 # Object to store and plot posterior results from MCMC
 #-----------
@@ -23,14 +29,17 @@ class Posterior(object):
     or directly from the numpyro mcmc object used for inference.
 
     '''
-    def __init__(self, xarray_samples: xr.Dataset):
+    def __init__(self, xarray_samples: xr.Dataset) -> None:
         """
         Initialize object directly from an xarray dataset. The latter contains 
         the results from MCMC-based inference which are saved locally in terms 
         of the sampled fragility function parameters. 
 
-        Args:
-            xarray_samples (xr.Dataset): MCMC samples from the posterior
+        Parameters
+        ----------
+        xarray_samples : xr.Dataset
+            Posterior samples of fragility function parameters 'eta1', 'beta', 
+            and, if more than two damage states, 'deltas'.
          
         """       
         self.samples = xarray_samples.copy()
@@ -46,23 +55,25 @@ class Posterior(object):
 
 
     @classmethod
-    def from_mcmc(cls, numpyro_mcmc, args):
+    def from_mcmc(cls, numpyro_mcmc: MCMC, args: dict) -> None:
         """
         Initialize object directly from the numpyro mcmc object used for inference.
 
-        Args:
-            numpyro_mcmc: The numpyro mcmc object used for inference.
-
-            args (dict): Settings used for inference (-> see the example notebooks)
-                Minimally required attributes consist of:
-                list_bc: A list with all considered building classes, e.g., ['A', 'B', ...]
-                list_ds: A list with all considered damage states, e.g., [0, 1, 2, 3, 4, 5]
-
-                Following additional attributes are stored with the data:
-                IM: String with the considered IM, e.g., 'PGA', 'SAT0_300' 
-                IM_unit: String with the unit of the considered IM, e.g., 'g [m/s2]'
-                GMM: The used ground motion model, e.g., ChiouYoungs2014Italy 
-                SCM: The used spatial correlation model, e.g., BodenmannEtAl2023            
+        Parameters
+        ----------
+        numpyro_mcmc : MCMC
+            The numpyro mcmc object used for inference.
+        args : dict
+            Settings used for inference (-> see the example notebooks)
+            Minimally required attributes consist of:
+            list_bc (list): A list with all considered building classes, e.g., ['A', 'B', ...]
+            list_ds (list): A list with all considered damage states, e.g., [0, 1, 2, ...]
+        
+            Following additional attributes are used for information purposes:
+            IM (str): The considered IM, e.g., 'PGA', 'SAT0_300' 
+            IM_unit (str): The unit of the considered IM, e.g., 'g [m/s2]'
+            GMM (str): The used ground motion model, e.g., ChiouYoungs2014Italy 
+            SCM (str): The used spatial correlation model, e.g., BodenmannEtAl2023                     
         """       
         res_az = az.from_numpyro(numpyro_mcmc, 
                             coords = {"bc": args['list_bc'],
@@ -80,13 +91,26 @@ class Posterior(object):
                 res_az.posterior.attrs[attr] = 'na'
         return cls(xarray_samples = az.extract(res_az.posterior))    
 
-    def get_diagnostics(self, verbosity: bool = True):
+    def get_diagnostics(self, verbosity: bool = True) -> pd.DataFrame:
         '''
         Computes MCMC convergence diagnostic metrics: effective sample size and
         R-hat. See also Appendix C of the Manuscript for further information.
+
+        Parameters
+        ----------
+        verbosity : bool, defaults to True
+            If True, prints a summary of the recommended threshold values
+
+        Returns
+        ----------
+        dfdiagnostic : pd.DataFrame, 
+            Convergence diagnostic metrics for each variable
         '''
+        vars = ['beta', 'eta']
+        if 'deltas' in self.samples: vars = vars + ['deltas']
+        if 'z' in self.samples: vars = vars + ['z']        
         dfdiagnostic = az.summary(self.samples.unstack(), 
-                                  var_names = ['beta', 'eta', 'deltas', 'z'],
+                                  var_names = vars,
                                   kind='diagnostics')
         if verbosity:
             print('Total number of variables:', len(dfdiagnostic))
@@ -96,21 +120,22 @@ class Posterior(object):
                 np.sum(dfdiagnostic.r_hat > 1.01))
         return dfdiagnostic[['ess_bulk', 'r_hat']]
 
-    def get_mean_fragparams(self, dataframe: bool = True, option: str = 'thetas'):
+    def get_mean_fragparams(self, to_dataframe: bool = True, option: str = 'thetas'):
         '''
         Computes mean posterior fragility function parameters as the average
         over the posterior samples.
 
-        Args:
-            dataframe (bool): If true returns parameters as a dataframe, otherwise
-                as an xarray data set. Defaults to True.
-
-            option (str): Chosen parametrization of fragility function
-                - 'thetas': The median IM which causes a structure to reach or 
-                            exceed a certain DS.
-                            P(DS >= ds|im) = norm.cdf( log(im/thetaDS) / beta )
-                - 'etas': The threshold parameters of the cumulative probit model.
-                            P(DS >= ds|im) = norm.cdf( log(im)/beta - etaDS )
+        Parameters
+        ----------
+        to_dataframe : bool, defaults to True
+            If true returns parameters as a dataframe, otherwise as an xarray data set
+        option : {'thetas', 'etas'}, defaults to 'thetas'
+            Chosen parametrization of fragility functions
+            - 'thetas': The median IM which causes a structure to reach or 
+                        exceed a certain DS.
+                        P(DS >= ds|im) = norm.cdf( log(im/thetaDS) / beta )
+            - 'etas': The threshold parameters of the cumulative probit model.
+                        P(DS >= ds|im) = norm.cdf( log(im)/beta - etaDS )            
         
         Note: The dispersion parameter beta is always included.
         '''
@@ -119,7 +144,7 @@ class Posterior(object):
         # Compute mean theta
         mean_thetas = np.exp(meanp.beta.values[:,None] * meanp.etas.values)
         meanp['thetas'] = (['bc', 'ds'], mean_thetas)
-        if dataframe == False:
+        if to_dataframe == False:
             return meanp
         else:
             df = pd.DataFrame()
@@ -138,62 +163,68 @@ class Posterior(object):
                 self.samples.eta.values + 
                 np.cumsum(self.samples.deltas.values, axis = 1),
                 axis=1)
+            ds_list = np.append(self.samples['ds1'].values, self.samples['ds2+'].values)
         else:
             etas = self.samples.eta.values
+            ds_list = self.samples['ds1'].values
 
         self.samples['etas'] = (['bc', 'ds', 'sample'], etas)
-        ds_list = np.append(self.samples['ds1'].values, self.samples['ds2+'].values)
         self.samples['etas'] = self.samples['etas'].assign_coords(
             {"ds": ds_list})
 
-    def get_logIM_samples(self, mu_B_S, L_BB_S):
+    def get_logIM_samples(self, mu_B_S: ArrayLike, L_BB_S: ArrayLike) -> Array:
         '''
         Transforms posterior samples of z to samples of logIM. These samples
         are from the posterior distribution of logIM at the locations of 
         the surveyed buildings.
 
-        Args:
-            mu_B_S (ArrayLike): Mean of logIM at the surveyed buildings conditional
-                on station data. Dimension: (n_sites,)
+        Parameters
+        ----------
+        mu_B_S : ArrayLike, dimension (n_sites, )
+            Mean of logIM at the surveyed buildings conditional on station data.
+        L_BB_S : ArrayLike, dimension (n_sites, n_sites)
+            Lower Cholesky transform of covariance matrix of logIM at the surveyed 
+            buildings conditional on station data. 
 
-            L_BB_S (ArrayLike): Lower Cholesky transform of covariance matrix of logIM 
-                at the surveyed buildings conditional on station data. 
-                Dimension: (n_sites x n_sites)       
+        Returns
+        ----------
+        logIM_samples : ArrayLike, dimension (n_sites, )
+            Posterior samples of logIM at the sites of surveyed buildings.
+
         '''
         if 'z' not in self.samples:
             raise ValueError('Requires access to posterior samples of z')
-        # sam_logIM = mu_B_S[:, None] + (L_BB_S @ self.samples.z.values)
-        # return xr.DataArray(sam_logIM, coords=[self.samples.sid, self.samples.sample])
         return mu_B_S[:, None] + (L_BB_S @ self.samples.z.values)
 
-    def plot_frag_funcs(self, ax, bc, im, color, ds_subset = None,
-                        kwargsm=dict(), includeCI: bool=True, 
+    def plot_frag_funcs(self, ax, bc, im, color, ds_subset: Optional[list] = None,
+                        kwargsm = dict(), includeCI: bool = True, 
                         kwargsCI = {'alpha': 0.2}):
         '''
         Plot the fragility functions using the posterior samples from the Bayesian 
         estimation approach.
 
-        Args:
-            ax: Matplotlib axis object, axis to plot the fragility functions.
-
-            bc: Building class for which to plot the fragility function.
-
-            im: Array of IM levels for which to plot the fragility function (horizontal axis) 
-
-            color: Matplotlib color. Uses color for all damage states and for mean and 90% CI. 
-
-            ds_subset (Optional): If provided, only the functions for these damage states will 
-                be plotted.
-
-            kwargsm (Optional, dict): Further matplotlib attributes that control the mean function,
-                e.g., {'linewidth': 1.75, 'linestyle': '--'}
-
-            includeCI (Optional, bool): If True, 90% CI is illustrated as the difference between the
-                95% and 5% quantile of all fragility function samples for each IM level.
-                Defaults to True
-            
-            kwargsCI (Optional, dict): Further matplotlib attributes that control the 90% CI shaded area.
-
+        Parameters
+        ----------
+        ax : Any
+            Matplotlib axis to plot the fragility functions
+        bc : Any
+            Building class name for which to plot the fragility function  
+        im : ArrayLike
+            Array of IM levels for which to plot the fragility function (horizontal axis)   
+        color : Any
+            Matplotlib color. Uses color for all damage states and for mean and 90% CI.
+        ds_subset : list, optional 
+            If provided, only the functions for these damage states will be plotted.
+        kwargsm : dict, optional
+            Further matplotlib attributes that control the mean fragility functions,
+            e.g., {'linewidth': 1.75, 'linestyle': '--'}
+            defaults to an empty dictionary.
+        includeCI : bool, defaults to True
+            If True, 90% CI is illustrated as the area between the 95% and 5% 
+            quantile of all fragility function samples for each IM level
+        kwargsCI : dict, optional
+            Further matplotlib attributes that control the 90% CI shaded area
+            defaults to {'alpha': 0.2}.
         '''  
         kwargsCI['color'] = kwargsm['color'] = color
 
@@ -212,24 +243,25 @@ class Posterior(object):
             ax.plot(im, stats.norm.cdf(logim/betas.mean() - etas.mean()), 
                     **kwargsm)
             
-    def save_as_netcdf(self, filepath: str, include_z: bool = False, **kwargs):
+    def save_as_netcdf(self, filepath: str, include_z: bool = False, **kwargs) -> None:
         '''
         Save posterior samples to disk using the netcdf format and the xarray package.
         By default, only the fragility function parameter samples are included.
 
-        Args:
-            filepath (str): Path to which to save this dataset.
-
-            include_z (bool): Whether to include posterior samples of z. If True, the file size
-                of the local copy can be large. To alleviate this, one can first compute the 
-                desired IM statistics and store these statistics separately 
-                (-> see the notebook examples).
-                Defaults to False
-
-            kwargs (dict): Further arguments passed to xarray.to_netcdf().
+        Parameters
+        ----------
+        filepath : str
+            Path to which to save this dataset
+        include_z : bool, defaults to False
+            Whether to include posterior samples of z. If True, the file size of the local 
+            copy can be large. To alleviate this, one can first compute the desired IM 
+            statistics and store these statistics separately (-> see the notebook examples).
+        kwargs : dict, optional
+            Further arguments passed to xarray.to_netcdf()
 
         '''  
-        vars = ['beta', 'eta', 'deltas']
+        vars = ['beta', 'eta']
+        if 'deltas' in self.samples: vars = vars + ['deltas']
         if include_z: vars = vars + ['z']
         self.samples[vars].unstack().to_netcdf(filepath, **kwargs)
       
@@ -242,12 +274,14 @@ class PosteriorPredictiveIM(object):
     Object to compute and sample from the posterior predictive distribution of IMs
     at other sites than the building survey sites.
     '''
-    def __init__(self, GPR: GPR, survey_sites: Sites, jitter=1e-5):
+    def __init__(self, GPR: GPR, survey_sites: Sites, jitter: float=1e-5) -> None:
         '''
-        Args:
-            GPR (GPR): Shake map computer
-
-            survey_sites (Sites): Surveyed building sites
+        Parameters
+        ----------
+        GPR : GPR
+            Object used to compute distribution of IM values conditional on station data.
+        survey_sites : Sites
+            Sites of surveyed building
         '''
         self.gpr = GPR
         self.survey_sites = survey_sites
@@ -255,7 +289,8 @@ class PosteriorPredictiveIM(object):
         self._precompute()
         
     
-    def sample(self, seed, target_sites, z_samples, L_BB_S, full_cov = False):
+    def sample(self, seed: int, target_sites: Sites, z_samples: ArrayLike, 
+                L_BB_S: ArrayLike, full_cov: bool = False) -> Array:
         '''
         Sample logIM values from the posterior predictive at the target_sites
         For each sample from the posterior of logIM at survey sites:
@@ -264,22 +299,25 @@ class PosteriorPredictiveIM(object):
         
         The workflow is further explained in the example notebook.
 
-        Args:
-            seed (): seed for JAX random number generator
+        Parameters
+        ----------
+        seed : int
+            Seed for JAX random number generator
+        target_sites : Sites
+            Sites at which we draw samples from the posterior predictive
+        z_samples : ArrayLike, dimension (n_samples, n_survey_sites)
+            Posterior samples of whitening variables z
+        L_BB_S : ArrayLike, dimension (n_survey_sites, n_survey_sites)
+            Lower Cholesky decomposition of the covariance matrix of logIM
+            at survey sites conditional on station data          
+        full_cov : bool, defaults to False
+            if True, generate correlated samples from the posterior predictive
+            if False, generate independent samples from the posterior predictive       
 
-            target_sites (Sites): Sites at which we draw samples from the posterior predictive
-
-            z_samples (ArrayLike): Posterior samples of z
-                dimension: (n_samples, n_survey_sites)
-
-            L_BB_S (ArrayLike): Lower Cholesky Decomposition of Sigma_BB_S
-
-            full_cov (bool): if True, generate correlated samples from the posterior predictive
-                            if False, generate independent samples from the posterior predictive
-
-        Returns:
-            sam_logIM (ArrayLike): Samples from the posterior predictive IM at the target_sites
-                dimension: (n_samples, n_target_sites)
+        Returns
+        ----------
+        sam_logIM : ArrayLike, dimension (n_samples, n_target_sites)
+            Samples from the posterior predictive IM at the target_sites
         '''
         # Covariance matrix between prior logIM at target and survey sites
         Sigma_TB = self.gpr.getCov(target_sites, self.survey_sites)
@@ -339,13 +377,16 @@ class PointEstimates(object):
     or directly from a dictionary with the inferred parameters.
 
     '''
-    def __init__(self, xarray_params):
+    def __init__(self, xarray_params: xr.Dataset) -> None:
         """
         Initialize object directly from an xarray dataset. The latter contains 
         the point estimates of the fragility function parameters. 
 
-        Args:
-            xarray_params (xr.Dataset): Point estimates of fragility parameters.
+        Parameters
+        ----------
+        xarray_params : xr.Dataset
+            Point estimates of fragility function parameters 'eta1', 'beta', 
+            and, if more than two damage states, 'deltas'.
          
         """    
         self.params = xarray_params
@@ -354,29 +395,32 @@ class PointEstimates(object):
         self.n_ds = len(self.params.ds.values) + 1
 
     @classmethod
-    def from_netcdf(cls, filepath: str):
+    def from_netcdf(cls, filepath: str) -> None:
 
         ds = xr.load_dataset(filepath)
         return cls(xarray_params = ds)
 
     @classmethod
-    def from_dict(cls, res_dict, args):
+    def from_dict(cls, res_dict: dict, args: dict) -> None:
         """
         Initialize object directly from a dictionary with the inferred parameters.
 
-        Args:
-            res_dict: Dictionary with the inferred parameters ['beta', 'eta1', 'deltas']
-
-            args (dict): Settings used for inference (-> see the example notebooks)
-                Minimally required attributes consist of:
-                list_bc: A list with all considered building classes, e.g., ['A', 'B', ...]
-                list_ds: A list with all considered damage states, e.g., [0, 1, 2, 3, 4, 5]
-
-                Following additional attributes are stored with the data:
-                IM: String with the considered IM, e.g., 'PGA', 'SAT0_300' 
-                IM_unit: String with the unit of the considered IM, e.g., 'g [m/s2]'
-                GMM: The used ground motion model, e.g., ChiouYoungs2014Italy 
-                SCM: The used spatial correlation model, e.g., BodenmannEtAl2023           
+        Parameters
+        ----------
+        res_dict : dict
+            Dictionary with the inferred parameters ['beta', 'eta1', 'deltas'].
+        
+        args : dict
+            Settings used for inference (-> see the example notebooks)
+            Minimally required attributes consist of:
+            list_bc (list): A list with all considered building classes, e.g., ['A', 'B', ...]
+            list_ds (list): A list with all considered damage states, e.g., [0, 1, 2, ...]
+        
+            Following additional attributes are used for information purposes:
+            IM (str): The considered IM, e.g., 'PGA', 'SAT0_300' 
+            IM_unit (str): The unit of the considered IM, e.g., 'g [m/s2]'
+            GMM (str): The used ground motion model, e.g., ChiouYoungs2014Italy 
+            SCM (str): The used spatial correlation model, e.g., BodenmannEtAl2023              
         """   
         betas = xr.DataArray(res_dict['beta'], dims = ['bc'], 
                     coords = [args['list_bc']], 
@@ -398,29 +442,31 @@ class PointEstimates(object):
                 ds.attrs[attr] = 'na'
         return cls(xarray_params = ds)    
 
-    def get_fragparams(self, dataframe = True, option = 'thetas'):
+    def get_fragparams(self, to_dataframe = True, option = 'thetas'):
         '''
         Collects estimated fragility function parameters.
 
-        Args:
-            dataframe (bool): If true returns parameters as a dataframe, otherwise
-                as an xarray data set. Defaults to True.
-
-            option (str): Chosen parametrization of fragility function
-                - 'thetas': The median IM which causes a structure to reach or 
-                            exceed a certain DS.
-                            P(DS >= ds|im) = norm.cdf( log(im/thetaDS) / beta )
-                - 'etas': The threshold parameters of the cumulative probit model.
-                            P(DS >= ds|im) = norm.cdf( log(im)/beta - etaDS )
+        Parameters
+        ----------
+        to_dataframe : bool, defaults to True
+            If true returns parameters as a dataframe, otherwise as an xarray data set
+        option : {'thetas', 'etas'}, defaults to 'thetas'
+            Chosen parametrization of fragility functions
+            - 'thetas': The median IM which causes a structure to reach or 
+                        exceed a certain DS.
+                        P(DS >= ds|im) = norm.cdf( log(im/thetaDS) / beta )
+            - 'etas': The threshold parameters of the cumulative probit model.
+                        P(DS >= ds|im) = norm.cdf( log(im)/beta - etaDS )            
         
         Note: The dispersion parameter beta is always included.
+
         '''
         if 'etas' not in self.params:
             self._compute_etas()
         if 'thetas' not in self.params:
             thetas = np.exp(self.params.beta.values[:,None] * self.params.etas.values)
             self.params['thetas'] = (['bc', 'ds'], thetas)
-        if dataframe == False:
+        if to_dataframe == False:
             return self.params[['beta', option]]
         else:
             df = pd.DataFrame()
@@ -452,28 +498,27 @@ class PointEstimates(object):
         self.params['etas'] = (['bc', 'ds'], etas)
         self.params['etas'] = self.params['etas'].assign_coords({"ds": coords})
   
-    def plot_frag_funcs(self, ax, bc, im, color = None, ds_subset = None, kwargs=dict()):
+    def plot_frag_funcs(self, ax, bc, im, color = None, ds_subset: Optional[list] = None, kwargs = dict()):
         '''
         Plot the fragility functions using the posterior samples from the Bayesian 
         estimation approach.
 
-        Args:
-            ax: Matplotlib axis object, axis to plot the fragility functions.
-
-            bc: Building class for which to plot the fragility function.
-
-            im: Array of IM levels for which to plot the fragility function (horizontal axis) 
-
-            color: Matplotlib color. Uses color for all damage states and for mean and 90% CI. 
-
-            ds_subset (Optional): If provided, only the functions for these damage states will 
-                be plotted.
-
-            ds_subset (Optional): If provided, only the functions for these damage states will 
-                be plotted.
-
-            kwargs (Optional, dict): Further matplotlib attributes that control the mean function,
-                e.g., {'linewidth': 1.75, 'linestyle': '--'}
+        Parameters
+        ----------
+        ax : Any
+            Matplotlib axis to plot the fragility functions
+        bc : Any
+            Building class name for which to plot the fragility function  
+        im : ArrayLike
+            Array of IM levels for which to plot the fragility function (horizontal axis)   
+        color : Any
+            Matplotlib color. Uses color for all damage states and for mean and 90% CI.
+        ds_subset : list, optional 
+            If provided, only the functions for these damage states will be plotted.
+        kwargs : dict, optional
+            Further matplotlib attributes that control the fragility functions,
+            e.g., {'linewidth': 1.75, 'linestyle': '--'}
+            defaults to an empty dictionary.
 
         '''  
         kwargs['color'] = color
@@ -490,11 +535,14 @@ class PointEstimates(object):
         '''
         Save estimated parameters to disk using the netcdf format and the xarray package.
 
-        Args:
-            filepath (str): Path to which to save this dataset.
-
-            kwargs (dict): Further arguments passed to xarray.to_netcdf().
+        Parameters
+        ----------
+        filepath : str
+            Path to which to save this dataset
+        kwargs : dict, optional
+            Further arguments passed to xarray.to_netcdf()
 
         '''  
-        vars = ['beta', 'eta', 'deltas']
+        vars = ['beta', 'eta']
+        if 'deltas' in self.params: vars = vars + ['deltas']
         self.params[vars].to_netcdf(filepath, **kwargs)
