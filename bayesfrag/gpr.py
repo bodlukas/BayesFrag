@@ -1,3 +1,6 @@
+# Copyright (c) Lukas Bodenmann, Bozidar Stojadinovic, ETH Zurich, Switzerland
+# SPDX-License-Identifier: BSD-3-Clause 
+
 import numpy as np
 from scipy import linalg
 

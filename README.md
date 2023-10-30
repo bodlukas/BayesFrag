@@ -19,11 +19,17 @@ To avoid any additional dependency on a specific ground motion model (GMM) libra
 
 To allow for a smooth start, we offer three tutorials that can be opened on a hosted Jupyter notebook service (e.g., Google Colab).  
 
-- The [first tutorial](Tutorial1.ipynb) reproduces the results of the one-dimensional example from the manuscript and explains the implementation of the proposed estimation approach. 
+- The [first tutorial](Tutorial1.ipynb) reproduces the results of the one-dimensional example from the manuscript and explains the implementation of the proposed estimation approach. <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial1.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
-- The [second tutorial](Tutorial2.ipynb) shows how the Bayesian approach can be applied to a realistic damage survey data set. 
+- The [second tutorial](Tutorial2.ipynb) shows how the Bayesian approach can be applied to a realistic damage survey data set. The notebook can easily be modified and extended such that analysts can apply BayesFrag to their data sets of interest. <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial2.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
-- The [third tutorial](Tutorial3.ipynb) explains the computation of the GMM estimates, which is done prior and separate to the fragility parameter estimation.  
+- The [third tutorial](Tutorial3.ipynb) explains the computation of the GMM estimates, which is done prior and separate to the fragility parameter estimation. <a target="_blank" href="https://colab.research.google.com/github/bodlukas/BayesFrag/blob/main/Tutorial3.ipynb">
+  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+</a>
 
 ## Structure
 
@@ -51,4 +57,4 @@ It is good practice to do the installation in a new virtual environment, for exa
 We gratefully acknowledge support from the ETH Risk Center ("DynaRisk", Grant Nr. 395 2018-FE-213).
 
 ## Licence
-BayesFrag is released under the [BSD-3-Clause license](LICENSE.md)
+BayesFrag is released under the [BSD-3-Clause license](LICENSE)
