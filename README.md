@@ -10,8 +10,8 @@ BayesFrag is an open-source Python library to perform Bayesian parameter estimat
 
 Seismic fragility functions provide a relationsship between damage and a ground motion intensity measure (IM).Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
 
-![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
-![alt text](https://github.com/bodlukas/BayesFrag/blob/5f71ba30ec516f7e08761170c3cecf3589eb2b4c/data/bayesfrag_schema_white.png#gh-light-mode-only)
+![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
+![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_white.png#gh-light-mode-only)
 
 To avoid any additional dependency on a specific ground motion model (GMM) library, the GMM estimates are computed prior and separate to the fragility parameter estimation.
 
