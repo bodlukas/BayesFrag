@@ -4,7 +4,7 @@
 [![DOI](https://zenodo.org/badge/542139247.svg)](https://zenodo.org/badge/latestdoi/542139247)
 -->
 
-BayesFrag is an open-source Python library to perform Bayesian parameter estimation of empirical seismic fragility models. The methodology is presented in :
+BayesFrag is an open-source Python library to perform Bayesian parameter estimation of empirical seismic fragility models. The methodology is presented in
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
@@ -13,7 +13,7 @@ Seismic fragility functions provide a relationsship between damage and a ground 
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_white.png#gh-light-mode-only)
 
-To avoid any additional dependency on a specific ground motion model (GMM) library, the GMM estimates are computed prior and separate to the fragility parameter estimation.
+To avoid any additional dependency on a specific library of ground motion models (GMMs), the GMM estimates are computed prior and separate to the fragility parameter estimation.
 
 ## Getting started
 
@@ -44,6 +44,8 @@ The notebook [figures.ipynb](figures.ipynb) reproduces the figures shown in the 
 The script [main_aquila_casestudy.py](main_aquila_casestudy.py) performs all computations - from parameter estimation to post-processing - to reproduce the results presented in the paper (and stored in the folder [results](results/)). This script is computationally expensive and causes high memory demand. The computations were performed on a NVIDIA V100 tensor core GPU with 25 GB of RAM and we do not recommend to run this script on a standard personal computer.
 
 ## Installation
+
+The following instructions only apply AFTER the package is published. For now, please use the tutorials within google colab.
 
 BayesFrag can be installed as 
 ```
