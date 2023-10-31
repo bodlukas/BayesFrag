@@ -6,6 +6,7 @@ from scipy import stats
 import arviz as az
 import pandas as pd
 import xarray as xr
+import matplotlib.pyplot as plt
 import jax
 import jax.numpy as jnp
 from scipy import linalg
@@ -13,7 +14,7 @@ from .sites import Sites
 from .gpr import GPR
 
 from numpyro.infer import MCMC
-from typing import Optional
+from typing import Optional, Union, Any
 from jax.typing import ArrayLike
 from jax import Array
 
@@ -120,7 +121,8 @@ class Posterior(object):
                 np.sum(dfdiagnostic.r_hat > 1.01))
         return dfdiagnostic[['ess_bulk', 'r_hat']]
 
-    def get_mean_fragparams(self, to_dataframe: bool = True, option: str = 'thetas'):
+    def get_mean_fragparams(self, to_dataframe: bool = True, 
+                        option: str = 'thetas') -> Union[pd.DataFrame, xr.Dataset]:
         '''
         Computes mean posterior fragility function parameters as the average
         over the posterior samples.
@@ -196,37 +198,40 @@ class Posterior(object):
             raise ValueError('Requires access to posterior samples of z')
         return mu_B_S[:, None] + (L_BB_S @ self.samples.z.values)
 
-    def plot_frag_funcs(self, ax, bc, im, color, ds_subset: Optional[list] = None,
-                        kwargsm = dict(), includeCI: bool = True, 
-                        kwargsCI = {'alpha': 0.2}):
+    def plot_frag_funcs(self, ax: plt.Axes, bc: Union[str, int], im: ArrayLike, 
+                    color: Optional[Any] = None, ds_subset: Optional[list] = None,
+                    kwargsm: Optional[dict] = None, includeCI: bool = True, 
+                    kwargsCI: Optional[dict] = None):
         '''
         Plot the fragility functions using the posterior samples from the Bayesian 
         estimation approach.
 
         Parameters
         ----------
-        ax : Any
-            Matplotlib axis to plot the fragility functions
-        bc : Any
-            Building class name for which to plot the fragility function  
+        ax : plt.Axes
+            Matplotlib axis to plot the fragility functions to.
+        bc : str | int
+            Building class name for which to plot the fragility function. Should be an
+            entry of args['list_bc'].
         im : ArrayLike
             Array of IM levels for which to plot the fragility function (horizontal axis)   
-        color : Any
-            Matplotlib color. Uses color for all damage states and for mean and 90% CI.
+        color : matplotlib.colors, optional
+            Matplotlib uses color for all damage states and for mean and 90% CI.
         ds_subset : list, optional 
             If provided, only the functions for these damage states will be plotted.
         kwargsm : dict, optional
             Further matplotlib attributes that control the mean fragility functions,
             e.g., {'linewidth': 1.75, 'linestyle': '--'}
-            defaults to an empty dictionary.
         includeCI : bool, defaults to True
             If True, 90% CI is illustrated as the area between the 95% and 5% 
             quantile of all fragility function samples for each IM level
         kwargsCI : dict, optional
-            Further matplotlib attributes that control the 90% CI shaded area
-            defaults to {'alpha': 0.2}.
+            Further matplotlib attributes that control the 90% CI shaded area.
         '''  
+        if kwargsm is None: kwargsm = dict()
+        if kwargsCI is None: kwargsCI = dict()
         kwargsCI['color'] = kwargsm['color'] = color
+        if 'alpha' not in kwargsCI.keys(): kwargsCI['alpha'] = 0.2            
 
         logim = np.atleast_2d(np.log(im)).T
         betas = self.samples.sel({'bc': bc}).beta.values
@@ -442,7 +447,7 @@ class PointEstimates(object):
                 ds.attrs[attr] = 'na'
         return cls(xarray_params = ds)    
 
-    def get_fragparams(self, to_dataframe = True, option = 'thetas'):
+    def get_fragparams(self, to_dataframe = True, option = 'thetas') -> Union[pd.DataFrame, xr.Dataset]:
         '''
         Collects estimated fragility function parameters.
 
@@ -498,29 +503,32 @@ class PointEstimates(object):
         self.params['etas'] = (['bc', 'ds'], etas)
         self.params['etas'] = self.params['etas'].assign_coords({"ds": coords})
   
-    def plot_frag_funcs(self, ax, bc, im, color = None, ds_subset: Optional[list] = None, kwargs = dict()):
+    def plot_frag_funcs(self, ax: plt.Axes, bc: Union[str, int], im: ArrayLike, 
+                    color: Optional[Any] = None, ds_subset: Optional[list] = None, 
+                    kwargs: Optional[dict] = None):
         '''
         Plot the fragility functions using the posterior samples from the Bayesian 
         estimation approach.
 
         Parameters
         ----------
-        ax : Any
-            Matplotlib axis to plot the fragility functions
-        bc : Any
-            Building class name for which to plot the fragility function  
+        ax : plt.Axes
+            Matplotlib axis to plot the fragility functions to.
+        bc : str | int
+            Building class name for which to plot the fragility function.
+            Should be an entry of args['list_bc'].
         im : ArrayLike
             Array of IM levels for which to plot the fragility function (horizontal axis)   
-        color : Any
-            Matplotlib color. Uses color for all damage states and for mean and 90% CI.
+        color : matplotlib color, optional
+            Matplotlib uses same color for all damage states.
         ds_subset : list, optional 
             If provided, only the functions for these damage states will be plotted.
         kwargs : dict, optional
-            Further matplotlib attributes that control the fragility functions,
+            Further matplotlib attributes that control the appearance of fragility functions,
             e.g., {'linewidth': 1.75, 'linestyle': '--'}
-            defaults to an empty dictionary.
 
-        '''  
+        ''' 
+        if kwargs == None: kwargs = dict()
         kwargs['color'] = color
         betas = self.params.sel({'bc': bc}).beta.values
         if ds_subset is None: ds_list = self.params.ds.values
