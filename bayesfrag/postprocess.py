@@ -178,7 +178,8 @@ class Posterior(object):
         '''
         Transforms posterior samples of z to samples of logIM. These samples
         are from the posterior distribution of logIM at the locations of 
-        the surveyed buildings.
+        the surveyed buildings. The number of survey sites is n_sites and the 
+        number of posterior samples is n_samples.
 
         Parameters
         ----------
@@ -190,7 +191,7 @@ class Posterior(object):
 
         Returns
         ----------
-        logIM_samples : ArrayLike, dimension (n_sites, )
+        logIM_samples : ArrayLike, dimension (n_sites, n_samples)
             Posterior samples of logIM at the sites of surveyed buildings.
 
         '''
