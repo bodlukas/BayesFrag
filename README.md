@@ -45,8 +45,6 @@ The script [main_aquila_casestudy.py](main_aquila_casestudy.py) performs all com
 
 ## Installation
 
-The following instructions only apply AFTER the package is published. For now, please use the tutorials within google colab.
-
 BayesFrag can be installed as 
 ```
 pip install bayesfrag
