@@ -8,7 +8,7 @@ BayesFrag is an open-source Python library to perform Bayesian parameter estimat
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
-Seismic fragility functions provide a relationsship between damage and a ground motion intensity measure (IM). Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
+Seismic fragility functions provide a relationship between damage and a ground motion intensity measure (IM). Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
 
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_white.png#gh-light-mode-only)
