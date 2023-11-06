@@ -14,7 +14,7 @@ authors = [
 ]
 description = "Bayesian estimation of empirical seismic fragility functions"
 requires-python = ">=3.10"
-version = "0.0.3"
+version = "0.0.4"
 readme = "README.md"
 license = {text = "BSD-3-Clause"}
 dependencies = [

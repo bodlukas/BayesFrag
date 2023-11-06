@@ -8,7 +8,7 @@ BayesFrag is an open-source Python library to perform Bayesian parameter estimat
 
 > Bodenmann L., Baker J. , Stojadinovic B. (2023): "Accounting for ground motion uncertainty in empirical seismic fragility modeling". INCLUDE LINK
 
-Seismic fragility functions provide a relationship between damage and a ground motion intensity measure (IM). Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings. 
+Seismic fragility functions provide a relationship between damage and a ground motion intensity measure (IM). Empirical fragility functions are estimated from damage survey data collected after past earthquakes. This is challenging, because the IM values that caused the observed damage are uncertain. BayesFrag computes the joint posterior distribution of fragility function parameters and IM values at the sites of the surveyed buildings.
 
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_dark.png#gh-dark-mode-only)
 ![schema](https://github.com/bodlukas/BayesFrag/blob/fff6196f53253e8c1c51cde3f34c9ad39bda1e86/data/bayesfrag_schema_white.png#gh-light-mode-only)
@@ -33,7 +33,7 @@ To allow for a smooth start, we offer three tutorials that can be opened on a ho
 
 ## Structure
 
-The folder [bayesfrag](bayesfrag/) contains the main codebase that is used and explained in the tutorials.
+The folder [bayesfrag](bayesfrag/) contains the main codebase of the BayesFrag package.
 
 The folder [data](data/) contains the data used in the two tutorials.
 
@@ -49,10 +49,10 @@ BayesFrag can be installed as
 ```
 pip install bayesfrag
 ```
-It is good practice to do the installation in a new virtual environment, for example with [miniconda](https://docs.conda.io/en/latest/miniconda.html). BayesFrag was tested with Python 3.10.12.
+It is good practice to do the installation in a new virtual environment, for example with [venv](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) or with [miniconda](https://docs.conda.io/en/latest/miniconda.html). BayesFrag was tested with Python >= v3.10.
 
 ## Contact
-BayesFrag is envisioned as an open-source software to be developed in collaboration with the community. If you are interested in contributing to the project or have any questions, comments, or suggestions, please contact Lukas Bodenmann at bodenmann (at) ibk.baug.ethz.ch.
+BayesFrag is an open-source software. If you are interested in contributing to the project or have any questions, comments, or suggestions, please contact Lukas Bodenmann at bodenmann (at) ibk.baug.ethz.ch.
 
 ## Acknowledgments
 We gratefully acknowledge support from the [ETH Risk Center](https://riskcenter.ethz.ch/) ("DynaRisk", Grant Nr. 395 2018-FE-213) and from the [Chair of Earthquake Engineering and Structural Dynamics](https://stojadinovic.ibk.ethz.ch/) at ETH Zurich.
