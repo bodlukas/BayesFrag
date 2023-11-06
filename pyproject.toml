@@ -1,9 +1,6 @@
 [build-system]
 requires = [
     "setuptools>=68.2.2",
-    "numpyro>=0.13.2",
-    "pandas>=1.5.3",
-    "arviz>=0.15.1",
 ]
 build-backend = "setuptools.build_meta"
 
