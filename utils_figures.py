@@ -1,6 +1,3 @@
-#
-#
-
 '''
 Utilities for reproducing the figures from the manuscript.
 

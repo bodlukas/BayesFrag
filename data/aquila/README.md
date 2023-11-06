@@ -10,11 +10,10 @@ The script `precompute_gmm.py` computes the GMM estimates at the sites of survey
 
 **References**
 
-Bodenmann, L., Baker, J., and Stojadinovic B. (2023): Accounting for ground motion uncertainty in empirical seismic fragility modeling. ... . doi: LINK!
+Bodenmann, L., Baker, J., and Stojadinovic B. (2023): Accounting for ground motion uncertainty in empirical seismic fragility modeling. Engineering Archive [preprint], [doi:10.31224/3336](https://doi.org/10.31224/3336)
 
 Dolce, M., Speranza, E., Giordano, F., et al. (2019): Observed damage database of past Italian earthquakes: The Da.D.O. WebGIS. Bollettino di Geofisica Teorica ed Applicata, [doi:10.4430/bgta0254](https://doi.org/10.4430/bgta0254)
 
 Luzi, L., Lanzano, G., Felicetta, C., et al. (2020): Engineering Strong Motion Database (ESM) (Version 2.0), [doi:10.13127/ESM.2](https://doi.org/10.13127/ESM.2)
 
 Mori, F., Mendicelli, A., Moscatelli, M., et al. (2020): Data for: A new Vs30 map for Italy based on the seismic microzonation dataset, Mendeley Data, V1, [doi:10.17632/8458tgzc73.1](https://doi.org/10.17632/8458tgzc73.1)
-
