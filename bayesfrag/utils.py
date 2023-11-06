@@ -1,4 +1,5 @@
-# ADD COPYRIGHT AND LICENSE
+# Copyright (c) Lukas Bodenmann, Bozidar Stojadinovic, ETH Zurich, Switzerland
+# SPDX-License-Identifier: BSD-3-Clause 
 
 import jax.numpy as jnp
 from jax.scipy.stats import norm
