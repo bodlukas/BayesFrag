@@ -1,8 +1,6 @@
 # BayesFrag: Bayesian estimation of empirical seismic fragility functions
 
-<!---
-[![DOI](https://zenodo.org/badge/542139247.svg)](https://zenodo.org/badge/latestdoi/542139247)
--->
+[![DOI](https://zenodo.org/badge/671215382.svg)](https://zenodo.org/badge/latestdoi/671215382)
 
 BayesFrag is an open-source Python library to perform Bayesian parameter estimation of empirical seismic fragility models. The methodology is presented in
 
